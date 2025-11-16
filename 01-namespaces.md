@@ -296,25 +296,95 @@ example after entering the new PID namespace.
 
 1. **Exercise 1**: Modify the program to create a PID namespace and run `bash` inside it. Verify you're PID 1.
 
-2. **Exercise 2**: Create a Python wrapper using ctypes:
+2. **Exercise 2**: Create a PID namespace using `unshare()` instead of `clone()`.
+
+    This exercise contrasts two approaches to creating PID namespaces:
+
+    **Approach 1 (in section 2.3):** `clone()` creates a new child process AND a new namespace atomically.
+
+    **Approach 2 (this exercise):** `unshare()` applies a namespace to the current process, then `fork()` creates children that inherit it.
+
+    Key difference: With `unshare()`, the current process becomes part of the namespace first. When you fork after `unshare()`, the parent becomes PID 1 in the new namespace, and the child is PID 2.
+
+    Create this script:
 
     ```python
    import ctypes
    import os
+   import sys
+   import signal
 
    CLONE_NEWPID = 0x20000000
 
    libc = ctypes.CDLL('libc.so.6', use_errno=True)
+
+   print(f"Parent PID (in original namespace): {os.getpid()}")
+
+   # Apply namespace to current process
    result = libc.unshare(CLONE_NEWPID)
 
-   if result == 0:
-       print("Created PID namespace!")
-       # Fork to enter namespace
-       if os.fork() == 0:
-           print(f"Child PID: {os.getpid()}")
+   if result != 0:
+       errno = ctypes.get_errno()
+       print(f"unshare failed: {os.strerror(errno)}", file=sys.stderr)
+       sys.exit(1)
+
+   print("Created PID namespace with unshare()!")
+
+   # Fork to create child in the new namespace
+   pid = os.fork()
+
+   if pid == 0:
+       # Child process - will be PID 2 in the new namespace
+       print(f"Child PID (in new namespace): {os.getpid()}")
+       print(f"Child PPID: {os.getppid()}")  # Parent is PID 1
+       sys.exit(0)
+   else:
+       # Parent process - will be PID 1 in the new namespace
+       print(f"Parent PID (in new namespace): {os.getpid()}")  # Will be 1!
+       os.waitpid(pid, 0)
    ```
 
+   Run this and compare the output to section 2.3. Notice how the parent process itself becomes PID 1 when using `unshare()`, whereas with `clone()` the created child is PID 1.
+
 3. **Exercise 3**: Create two separate PID namespaces and run `sleep 100` in each. Verify they can't see each other's processes.
+
+    **Hints (pseudocode structure — implement yourself!):**
+
+    ```
+    # Strategy: Create two independent containers, each with:
+    # - Its own PID namespace
+    # - Its own /proc mount (so ps works correctly)
+    # - Running sleep 100 as its main process
+
+    Main script approach:
+
+    For Container 1:
+      - Fork a child process
+      - In child: unshare(CLONE_NEWPID)
+      - Fork again to become PID 1
+      - Mount new /proc (how would you do this?)
+      - Exec sleep 100
+      - Parent waits...
+
+    For Container 2:
+      - Do the same as Container 1, but in a separate fork
+
+    Verification (from another terminal while sleep processes run):
+      - Run: ps aux
+        → Question: Do you see the sleep processes?
+
+      - Run: ps aux | grep sleep
+        → How many instances? Why that number?
+
+      - For each sleep process PID, check /proc/PID/ns/pid
+        → Are the inode numbers different?
+        → What does that tell you?
+
+    Challenge questions to guide your thinking:
+      - Why do you need to fork twice in each namespace?
+      - How do you make ps show the correct PID 1 as the init process?
+      - Can you access /proc from the parent namespace and see the isolated /proc from each container?
+    ```
 
 ---
 
@@ -993,6 +1063,370 @@ sudo apt-get install bridge-utils # Provides brctl
 sudo apt-get install docker.io
 sudo apt-get install podman
 ```
+
+---
+
+## Appendix A: Using os Module Constants for Namespace Flags
+
+### Overview
+
+Instead of hardcoding hex values like `CLONE_NEWPID = 0x20000000`, Python's `os` module provides named constants for all namespace flags. This makes code more readable and self-documenting.
+
+### Available Constants
+
+All namespace constants are available directly from the `os` module:
+
+```python
+import os
+
+os.CLONE_NEWPID      # PID namespace
+os.CLONE_NEWNET      # Network namespace
+os.CLONE_NEWNS       # Mount namespace
+os.CLONE_NEWUTS      # UTS (hostname) namespace
+os.CLONE_NEWIPC      # IPC namespace
+os.CLONE_NEWUSER     # User namespace
+os.CLONE_NEWCGROUP   # Cgroup namespace
+os.CLONE_NEWTIME     # Time namespace
+```
+
+### How to Find These Constants
+
+#### 1. Python's `os` Module Documentation
+
+Check the [Python os module docs](https://docs.python.org/3/library/os.html) for available CLONE_* constants.
+
+#### 2. Query at Runtime
+
+```bash
+python3 -c "import os; print(os.CLONE_NEWPID)"
+# Output: 536870912 (decimal form of 0x20000000)
+```
+
+#### 3. Linux Man Pages
+
+```bash
+man 2 clone
+man 7 pid_namespaces
+```
+
+#### 4. Linux Kernel Source
+
+Constants are defined in `/usr/include/linux/sched.h` or in the [Linux kernel source on GitHub](https://github.com/torvalds/linux/blob/master/include/uapi/linux/sched.h):
+
+```c
+#define CLONE_NEWPID     0x20000000  /* New pid namespace */
+#define CLONE_NEWUTS     0x04000000  /* New utsname namespace */
+#define CLONE_NEWIPC     0x08000000  /* New IPC namespace */
+#define CLONE_NEWNET     0x40000000  /* New network namespace */
+#define CLONE_NEWNS      0x00020000  /* New mount namespace */
+#define CLONE_NEWUSER    0x10000000  /* New user namespace */
+#define CLONE_NEWCGROUP  0x02000000  /* New cgroup namespace */
+#define CLONE_NEWTIME    0x00000080  /* New time namespace */
+```
+
+### Using Constants in Code
+
+#### Single Namespace
+
+```python
+import os
+import ctypes
+
+libc = ctypes.CDLL('libc.so.6', use_errno=True)
+
+# Using constant instead of 0x20000000
+result = libc.unshare(os.CLONE_NEWPID)
+
+if result != 0:
+    print(f"unshare failed: {os.strerror(ctypes.get_errno())}")
+```
+
+#### Multiple Namespaces (Bitwise OR)
+
+```python
+import os
+import ctypes
+
+libc = ctypes.CDLL('libc.so.6', use_errno=True)
+
+# Combine multiple namespaces
+flags = os.CLONE_NEWPID | os.CLONE_NEWUTS | os.CLONE_NEWIPC | os.CLONE_NEWNET
+
+result = libc.unshare(flags)
+
+if result != 0:
+    print(f"unshare failed: {os.strerror(ctypes.get_errno())}")
+```
+
+#### With os.unshare() (Python 3.9+)
+
+Python 3.9+ provides `os.unshare()` directly, eliminating the need for ctypes:
+
+```python
+import os
+
+# Create PID namespace
+os.unshare(os.CLONE_NEWPID)
+
+# Create multiple namespaces
+os.unshare(os.CLONE_NEWPID | os.CLONE_NEWUTS | os.CLONE_NEWIPC)
+```
+
+### Refactoring Example
+
+**Before (hardcoded hex):**
+
+```python
+CLONE_NEWPID = 0x20000000
+CLONE_NEWUTS = 0x04000000
+CLONE_NEWIPC = 0x08000000
+CLONE_NEWNET = 0x40000000
+
+flags = CLONE_NEWPID | CLONE_NEWUTS | CLONE_NEWIPC | CLONE_NEWNET
+libc.unshare(flags)
+```
+
+**After (using os module):**
+
+```python
+import os
+
+flags = os.CLONE_NEWPID | os.CLONE_NEWUTS | os.CLONE_NEWIPC | os.CLONE_NEWNET
+os.unshare(flags)  # Python 3.9+
+# OR
+# libc.unshare(flags)  # for older Python versions
+```
+
+Benefits:
+- More readable and self-documenting
+- No risk of typos in hex values
+- Automatically correct for the system
+- Standard Python approach
+
+---
+
+## Appendix B: Understanding os.fork() Return Values and PID Namespaces
+
+### The Fork Behavior
+
+When you call `os.fork()`, the process splits into two: a **parent** and a **child**. The critical thing is that `fork()` returns **different values** to each process:
+
+```python
+pid = os.fork()
+
+if pid == 0:
+    # Child process - pid variable is 0
+    print(f"I am the child, pid = {pid}")
+else:
+    # Parent process - pid variable is the child's actual PID
+    print(f"I am the parent, pid = {pid}")
+```
+
+### Return Value Reference
+
+| Context | `pid` Variable Value | Meaning |
+|---------|---|---|
+| **Parent process** | Positive number (e.g., `1`) | This is the child's actual PID |
+| **Child process** | `0` | This indicates we're in the child |
+| **Fork failed** | `-1` | Error occurred |
+
+### Example: Using unshare() + fork()
+
+Here's how `unshare()` + `fork()` works together:
+
+```python
+import os
+import ctypes
+import sys
+
+libc = ctypes.CDLL('libc.so.6', use_errno=True)
+
+print(f"Parent PID in original namespace: {os.getpid()}")  # 407920
+
+# Create new PID namespace
+result = libc.unshare(os.CLONE_NEWPID)
+
+if result != 0:
+    errno = ctypes.get_errno()
+    print(f"unshare failed: {os.strerror(errno)}", file=sys.stderr)
+    sys.exit(1)
+
+# Now fork in the new namespace
+pid = os.fork()
+
+if pid == 0:
+    # CHILD process (pid == 0)
+    # This process becomes PID 1 in the new namespace
+    print(f"Child PID after fork (in new namespace): {os.getpid()}")  # 1
+    print(f"Child PPID: {os.getppid()}")  # 0
+    sys.exit(0)
+else:
+    # PARENT process (pid == 1, the child's PID)
+    # Parent still has original PID in new namespace
+    print(f"Parent PID (in new namespace): {os.getpid()}")  # 407920
+    os.waitpid(pid, 0)  # Wait for child
+```
+
+### Output Explanation
+
+```
+Parent PID in original namespace: 407920        ← Before unshare/fork
+Child PID after fork (in new namespace): 1      ← Child process (pid==0 branch)
+Parent PID (in new namespace): 407920           ← Parent process (else branch)
+Child PPID: 0                                   ← Child's parent not in child's namespace
+```
+
+### Key Insights
+
+1. **Two processes, one code**: After `fork()`, both parent and child execute from that point, but the `if pid == 0` condition lets them take different paths
+
+2. **Namespace isolation**: When you `unshare(CLONE_NEWPID)` then `fork()`:
+   - Parent remains the process that called `unshare()` (keeps original PID)
+   - Child becomes PID 1 in the new namespace
+   - They're now in different PID namespaces
+
+3. **Why child PPID is 0**: The child's parent (407920) doesn't exist in the child's namespace because they're in different namespaces. The kernel can't find the parent, so it shows 0.
+
+4. **Wait for child**: The parent uses `os.waitpid(pid, 0)` to wait for the child to finish. This prevents the parent from exiting before the child is done.
+
+### Common Pattern
+
+This is the foundation of container initialization:
+
+```python
+# 1. Create namespace(s)
+os.unshare(os.CLONE_NEWPID)
+
+# 2. Fork to become PID 1 in new namespace
+pid = os.fork()
+
+if pid == 0:
+    # Child becomes the container's init process (PID 1)
+    setup_container_environment()
+    run_container_command()
+else:
+    # Parent cleans up and waits
+    os.waitpid(pid, 0)
+```
+
+---
+
+## Appendix C: clone() vs fork() - Process Creation Comparison
+
+### Both Create Two Processes
+
+When you call either `clone()` or `fork()`, you end up with **two processes running**. The difference is **how** and **where** the code branches.
+
+### Execution Model Comparison
+
+**With `fork()`:**
+
+Both parent and child execute from the `fork()` call onward. The return value tells them apart:
+
+```python
+pid = os.fork()
+
+if pid == 0:
+    # BOTH parent and child reach this point
+    # Child takes this path (pid == 0)
+    print("Child code")
+else:
+    # Parent takes this path (pid > 0)
+    print("Parent code")
+```
+
+**With `clone()`:**
+
+The child immediately runs a **specific function** you provide, while the parent continues after the `clone()` call:
+
+```c
+int clone(int (*fn)(void *), void *stack, int flags, void *arg);
+```
+
+Python example:
+
+```python
+def child_fn(arg):
+    """Only the child runs this function"""
+    print("Child code")
+    os.execlp("ps", "ps", "aux")
+    return 1
+
+# Parent continues here immediately after clone
+child_pid = libc.clone(child_callback, stack_top, flags, None)
+
+if child_pid > 0:
+    print("Parent code")
+    os.waitpid(child_pid, 0)  # Wait for child
+```
+
+### Execution Flow Diagram
+
+```
+clone() call
+    │
+    ├─→ Parent process
+    │   └─ Continues after clone()
+    │   └─ Returns child_pid (> 0)
+    │   └─ Can do other work or wait
+    │
+    └─→ Child process
+        └─ Immediately runs child_fn()
+        └─ Only gets function return value
+```
+
+### Real Example from Section 2.3
+
+From the namespace guide's PID namespace example:
+
+```python
+def child_fn(arg):
+    pid = os.getpid()
+    print(f"Child PID: {pid}")       # Runs in child
+    os.execlp("ps", "ps", "aux")
+    return 1
+
+# ... setup ...
+
+child_pid = libc.clone(child_callback, stack_top, flags, None)
+
+if child_pid == -1:
+    print(f"clone failed")           # Parent code
+else:
+    print(f"Created child with PID: {child_pid}")  # Parent code
+    os.waitpid(child_pid, 0)        # Parent waits
+```
+
+**Output:**
+```
+Created child with PID: 12346      ← Parent prints this
+Child PID: 1                       ← Child prints this (runs child_fn)
+Child PPID: 0                      ← Child prints this (runs child_fn)
+```
+
+### Comparison Table
+
+| Aspect | `fork()` | `clone()` |
+|--------|---------|----------|
+| **Processes created** | 2 (parent + child) | 2 (parent + child) |
+| **Child code execution** | Continues from fork() call | Runs specific function passed to clone |
+| **Both run same code** | Yes, from fork() onward | No, child runs different function |
+| **Return value** | Different to parent and child | Only parent gets return value (child_pid) |
+| **Typical use case** | General process duplication, shell commands | Creating processes with specific setup (namespaces, stacks) |
+| **Complexity** | Simpler | More involved (requires stack allocation) |
+
+### Why Two Processes?
+
+Both `fork()` and `clone()` create two processes because:
+
+1. **Process isolation**: Parent and child are independent
+2. **Namespace creation**: Creating a namespace requires a process to exist in it
+3. **Control**: Parent can monitor, wait for, or manage the child
+4. **Cleanup**: Parent can wait and reap the child's exit status
+
+In containers specifically:
+- Parent = container setup/management
+- Child = actual container process (becomes PID 1 in namespace)
 
 ---
 

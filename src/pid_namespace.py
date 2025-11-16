@@ -6,7 +6,6 @@ import sys
 import signal
 import time
 
-CLONE_NEWPID = 0x20000000
 STACK_SIZE = 1024 * 1024
 
 libc = ctypes.CDLL('libc.so.6', use_errno=True)
@@ -18,9 +17,9 @@ def child_fn(arg):
     print(f"Child PID: {pid}")
     print(f"Child PPID: {ppid}")
 
-    double_fork_demo()
+    # double_fork_demo()
 
-    os.execlp("ps", "ps", "aux")
+    os.execlp("bash", "bash")
     return 1
 
 def double_fork_demo():
@@ -39,7 +38,7 @@ def double_fork_demo():
         os.waitpid(pid, 0)
 
 def main():
-    print(f"Parrent PID: {os.getpid()}")
+    print(f"Parent PID: {os.getpid()}")
 
     CHILD_FUNC = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p)
     child_callback = CHILD_FUNC(child_fn)
@@ -47,7 +46,7 @@ def main():
     stack = ctypes.create_string_buffer(STACK_SIZE)
     stack_top = ctypes.c_void_p(ctypes.addressof(stack) + STACK_SIZE)
 
-    flags = CLONE_NEWPID | signal.SIGCHLD
+    flags = os.CLONE_NEWPID | signal.SIGCHLD
     child_pid = libc.clone(
         child_callback,
         stack_top,
