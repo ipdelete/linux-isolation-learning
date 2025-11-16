@@ -62,11 +62,11 @@ Testing Checklist
   6. Test Namespace Experiments (the whole point!)
 
   # Create a simple namespace test script in shared dir
-  cat > /home/cip/.miniarch/ns_test.py << 'EOF'
-  import os
-  print(f"PID: {os.getpid()}")
-  print(f"Hostname: {os.uname().nodename}")
-  EOF
+cat > /home/cip/.miniarch/ns_test.py << 'EOF'
+import os
+print(f"PID: {os.getpid()}")
+print(f"Hostname: {os.uname().nodename}")
+EOF
 
   # Run it in the container
   ./scripts/lab-env exec python /shared/ns_test.py

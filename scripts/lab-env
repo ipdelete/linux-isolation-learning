@@ -186,6 +186,20 @@ Zone=container
 EOF
 
     log_success "Configuration written to $NSPAWN_CONFIG"
+
+    # Create systemd drop-in to add capabilities for namespace experiments
+    log_info "Creating systemd drop-in for capabilities"
+    local DROP_IN_DIR="/etc/systemd/system/systemd-nspawn@${CONTAINER_NAME}.service.d"
+    mkdir -p "$DROP_IN_DIR"
+
+    cat > "$DROP_IN_DIR/capabilities.conf" <<EOF
+[Service]
+ExecStart=
+ExecStart=/usr/bin/systemd-nspawn --quiet --keep-unit --boot --link-journal=try-guest --network-veth --machine=%i --capability=all
+EOF
+
+    systemctl daemon-reload
+    log_success "Capabilities drop-in created"
 }
 
 enable_host_networking() {
@@ -306,6 +320,14 @@ cmd_destroy() {
     if [[ -f "$NSPAWN_CONFIG" ]]; then
         log_info "Removing $NSPAWN_CONFIG"
         rm -f "$NSPAWN_CONFIG"
+    fi
+
+    # Remove systemd drop-in
+    local DROP_IN_DIR="/etc/systemd/system/systemd-nspawn@${CONTAINER_NAME}.service.d"
+    if [[ -d "$DROP_IN_DIR" ]]; then
+        log_info "Removing systemd drop-in"
+        rm -rf "$DROP_IN_DIR"
+        systemctl daemon-reload
     fi
 
     log_success "Container destroyed"

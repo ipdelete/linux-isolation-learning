@@ -4,6 +4,7 @@ import ctypes
 import os
 import sys
 import signal
+import time
 
 CLONE_NEWPID = 0x20000000
 STACK_SIZE = 1024 * 1024
@@ -17,8 +18,25 @@ def child_fn(arg):
     print(f"Child PID: {pid}")
     print(f"Child PPID: {ppid}")
 
+    double_fork_demo()
+
     os.execlp("ps", "ps", "aux")
     return 1
+
+def double_fork_demo():
+    """Double fork to become PID 1 in the namespace"""
+    print(f"First child PID: {os.getpid()}")
+
+    pid = os.fork()
+
+    if pid == 0:
+        # Second child - will be PID 1 in new PID namespace
+        print(f"Second child PID: {os.getpid()}")  # will be 1 in new PID ns
+        time.sleep(100)
+        os._exit(0)
+    else:
+        # First child waits for second child
+        os.waitpid(pid, 0)
 
 def main():
     print(f"Parrent PID: {os.getpid()}")
