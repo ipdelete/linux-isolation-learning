@@ -181,76 +181,77 @@ adding an entry with `"type": "pid"` in the `linux.namespaces` array of
 process becomes PID 1 inside that PID namespace and mounts `/proc` according
 to the `mounts` section, so tools like `ps` see the correct, isolated PID view.
 
-### 2.3 Write Your First Namespace Program (Rust)
+### 2.3 Write Your First Namespace Program (Python)
 
-Here is a minimal Rust example that mirrors the C version using `libc::clone`
-and then `execlp` to run `ps aux` inside the new PID namespace.
+Here is a minimal Python example that uses `ctypes` to call `libc.clone()`
+and run `ps aux` inside the new PID namespace.
 
-```rust
-use nix::sys::wait::waitpid;
-use nix::unistd::Pid;
-use std::ffi::CString;
-use std::io;
-use std::ptr;
+```python
+#!/usr/bin/env python3
+import ctypes
+import os
+import sys
+import signal
 
-const STACK_SIZE: usize = 1024 * 1024;
+# Constants
+CLONE_NEWPID = 0x20000000
+STACK_SIZE = 1024 * 1024
 
-extern "C" fn child_fn(_: *mut libc::c_void) -> libc::c_int {
-    unsafe {
-        let pid = libc::getpid();
-        let ppid = libc::getppid();
-        println!("Child PID: {pid}");
-        println!("Child PPID: {ppid}");
+# Load libc
+libc = ctypes.CDLL('libc.so.6', use_errno=True)
 
-        let ps = CString::new("ps").unwrap();
-        let aux = CString::new("aux").unwrap();
+def child_fn(arg):
+    """Function to run in the new PID namespace"""
+    pid = os.getpid()
+    ppid = os.getppid()
+    print(f"Child PID: {pid}")
+    print(f"Child PPID: {ppid}")
 
-        libc::execlp(ps.as_ptr(), ps.as_ptr(), aux.as_ptr(), ptr::null());
-        eprintln!("failed to exec ps: {}", io::Error::last_os_error());
-        -1
-    }
-}
+    # Execute ps aux
+    os.execlp("ps", "ps", "aux")
+    # If exec fails, we'll get here
+    return 1
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parent_pid = unsafe { libc::getpid() };
-    println!("Parent PID: {parent_pid}");
+def main():
+    print(f"Parent PID: {os.getpid()}")
 
-    let mut stack = vec![0u8; STACK_SIZE];
-    let stack_top = unsafe { stack.as_mut_ptr().add(STACK_SIZE) };
+    # Create a callback type that matches the clone signature
+    CHILD_FUNC = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p)
+    child_callback = CHILD_FUNC(child_fn)
 
-    let flags = libc::CLONE_NEWPID | libc::SIGCHLD;
+    # Allocate stack for child
+    stack = ctypes.create_string_buffer(STACK_SIZE)
+    stack_top = ctypes.c_void_p(ctypes.addressof(stack) + STACK_SIZE)
 
-    let child_pid = unsafe {
-        libc::clone(
-            child_fn,
-            stack_top as *mut libc::c_void,
-            flags,
-            ptr::null_mut(),
-        )
-    };
+    # Clone with CLONE_NEWPID flag
+    flags = CLONE_NEWPID | signal.SIGCHLD
+    child_pid = libc.clone(
+        child_callback,
+        stack_top,
+        flags,
+        None
+    )
 
-    if child_pid == -1 {
-        return Err(Box::new(io::Error::last_os_error()));
-    }
+    if child_pid == -1:
+        errno = ctypes.get_errno()
+        print(f"clone failed: {os.strerror(errno)}", file=sys.stderr)
+        return 1
 
-    println!("Created child with PID: {child_pid}");
-    waitpid(Pid::from_raw(child_pid), None)?;
-    Ok(())
-}
+    print(f"Created child with PID: {child_pid}")
+
+    # Wait for child to finish
+    os.waitpid(child_pid, 0)
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
 ```
 
-**Build and run:**
+**Run:**
 
 ```bash
-cargo new pid_namespace
-cd pid_namespace
-
-# Add to Cargo.toml under [dependencies]
-# libc = "0.2"
-# nix = "0.34"
-
-cargo build --release
-sudo ./target/release/pid_namespace
+chmod +x pid_namespace.py
+sudo ./pid_namespace.py
 ```
 
 **Expected output:**
@@ -262,33 +263,33 @@ Child PID: 1        # <-- Child thinks it's PID 1!
 Child PPID: 0       # <-- Parent is PID 0 from child's view
 ```
 
-### 2.4 Understanding the Double Fork (Rust)
+### 2.4 Understanding the Double Fork (Python)
 
 To truly become PID 1 inside the new namespace, the child created by `clone`
 can fork again so the grandchild inherits PID 1. Here is the core of that
-logic written in Rust using `nix::unistd::fork`:
+logic written in Python:
 
-```rust
-use nix::unistd::{fork, ForkResult, getpid};
-use std::time::Duration;
+```python
+import os
+import time
 
-fn double_fork_demo() {
-    println!("First child PID: {}", getpid());
+def double_fork_demo():
+    """Double fork to become PID 1 in the namespace"""
+    print(f"First child PID: {os.getpid()}")
 
-    match fork().expect("fork failed") {
-        ForkResult::Child => {
-            println!("Second child PID: {}", getpid()); // will be 1 in new PID ns
-            std::thread::sleep(Duration::from_secs(100));
-            std::process::exit(0);
-        }
-        ForkResult::Parent { child } => {
-            let _ = waitpid(child, None);
-        }
-    }
-}
+    pid = os.fork()
+
+    if pid == 0:
+        # Second child - will be PID 1 in new PID namespace
+        print(f"Second child PID: {os.getpid()}")  # will be 1 in new PID ns
+        time.sleep(100)
+        os._exit(0)
+    else:
+        # First child waits for second child
+        os.waitpid(pid, 0)
 ```
 
-You would call `double_fork_demo()` from inside the `child_fn` of the previous
+You would call `double_fork_demo()` from inside the `child_fn()` of the previous
 example after entering the new PID namespace.
 
 ### 2.5 Exercises
