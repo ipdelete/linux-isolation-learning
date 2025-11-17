@@ -1430,6 +1430,114 @@ In containers specifically:
 
 ---
 
+## Appendix D: Exercise 3 - Verifying Namespace Isolation
+
+### The Goal
+
+Create two separate PID namespaces running `sleep 100` in each, and verify they can't see each other's processes.
+
+### Implementation
+
+Using two `clone(CLONE_NEWPID)` calls with separate stacks:
+
+```python
+def child_fn(arg):
+    """Function to run in the new PID namespace"""
+    pid = os.getpid()
+    ppid = os.getppid()
+    print(f"Child PID: {pid}")
+    print(f"Child PPID: {ppid}")
+
+    # Replace this process with sleep
+    os.execlp("sleep", "sleep", "100")
+    return 1
+
+# Create first namespace
+child_pid_01 = libc.clone(child_callback, stack_top_01, flags, None)
+
+# Create second namespace
+child_pid_02 = libc.clone(child_callback, stack_top_02, flags, None)
+
+# Wait for both
+os.waitpid(child_pid_01, 0)
+os.waitpid(child_pid_02, 0)
+```
+
+### Verification Process
+
+#### Step 1: Launch the script
+
+```bash
+sudo python3 pid_two.py
+```
+
+This creates two sleep processes in separate namespaces.
+
+#### Step 2: View running processes (from another terminal)
+
+```bash
+ps aux | grep sleep
+```
+
+**Output:**
+```
+root      494080  0.0  0.0   5744  3952 pts/5    S+   20:30   0:00 sleep 100
+root      494081  0.0  0.0   5744  3960 pts/5    S+   20:30   0:00 sleep 100
+```
+
+You see two independent `sleep 100` processes running as root.
+
+#### Step 3: Check namespace inodes
+
+```bash
+sudo readlink /proc/494080/ns/pid
+sudo readlink /proc/494081/ns/pid
+```
+
+**Output:**
+```
+pid:[4026532129]
+pid:[4026532130]
+```
+
+### Understanding the Results
+
+**Different inode numbers = Different namespaces!**
+
+| PID | Namespace Inode | Meaning |
+|-----|---|---|
+| 494080 | `4026532129` | This process is in namespace A |
+| 494081 | `4026532130` | This process is in namespace B |
+
+The kernel assigns each namespace a unique inode number. When the numbers differ, the processes are in **completely separate PID namespaces**.
+
+### What This Proves
+
+1. **Process isolation**: Each process thinks it's the only one running
+   - Process 494080 sees only itself (PID 1 in its namespace)
+   - Process 494081 sees only itself (PID 1 in its namespace)
+   - Neither can see the other
+
+2. **Independence**: The processes are completely isolated
+   - Signals sent to one don't affect the other
+   - Resource usage is separate
+   - Process trees are separate
+
+3. **Container foundation**: This is the core of how containers isolate processes
+   - Each container gets its own PID namespace
+   - Multiple containers can run on the same host without interfering
+
+### Key Insights
+
+- **`clone(CLONE_NEWPID)` twice** = Two independent namespaces
+- **Different inode numbers** = Proof of separate namespaces
+- **Both processes run in parallel** = The `clone()` calls return immediately, so both children start simultaneously
+- **Parent waits for both** = `waitpid()` calls ensure parent doesn't exit before children finish
+
+This is what container runtimes like Docker do under the hood: create separate PID namespaces for each container so they remain isolated from each other.
+
+---
+
 ## Next Steps
 
 After mastering namespaces, move to:
