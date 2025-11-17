@@ -1,3 +1,5 @@
+from: [ChatGPT](https://chatgpt.com/share/691a8f74-1ac4-8002-ab10-943b46eaf390)
+
 Nice, Ian, going straight from Python into Linux namespaces via `clone`. Casual stuff.
 
 I’ll walk through this literally line by line and also tell you *what effect* each part has at runtime, especially in terms of PID namespaces.
