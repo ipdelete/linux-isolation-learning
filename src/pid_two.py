@@ -60,11 +60,19 @@ def main():
         print(f"clone failed: {os.strerror(errno)}", file=sys.stderr)
         return 1
     
+    children = []
+
+    if child_pid_01 != -1:
+        children.append(child_pid_01)
+    if child_pid_02 != -1:
+        children.append(child_pid_02)
+    
     print(f"Created child with PID: {child_pid_01}")
     print(f"Created child with PID: {child_pid_02}")
 
-    os.waitpid(child_pid_01, 0)
-    os.waitpid(child_pid_02, 0)
+    for _ in range(len(children)):
+        os.waitpid(-1, 0)
+    
     return 0
 
 if __name__ == '__main__':
