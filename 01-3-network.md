@@ -1976,3 +1976,16 @@ After completing this phase:
 - Python + subprocess is a practical way to manage network namespaces
 
 These are the same primitives Docker and Kubernetes use for container networking!
+
+---
+
+## Appendix: `ip link add … type veth peer name …`
+
+When the Python helper runs `ip link add <host_veth> type veth peer name <ns_veth>`, it asks the kernel to create a virtual Ethernet (veth) pair:
+
+- `ip link add` instructs iproute2 to create a new network link device.
+- `<host_veth>` names the interface that stays in the host namespace.
+- `type veth` specifies the link type as a veth, which always comes in connected pairs.
+- `peer name <ns_veth>` assigns a name to the second end of the pair, typically moved into another namespace.
+
+Veth pairs behave like two ends of a virtual cable: frames sent on one interface immediately appear on the other. They are the core building block for connecting network namespaces, containers, and bridges while keeping the rest of the network stack isolated.
