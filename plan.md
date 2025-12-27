@@ -1,12 +1,13 @@
 # Rewrite Plan (Rust-first)
 
-Goal: Replace the current Python/C/bash-heavy learning path with a Rust-first, small-file, tool-driven curriculum that teaches Linux isolation concepts while teaching Rust.
+Goal: Replace the current Python/C/bash-heavy learning path with a Rust-first, small-file, tool-driven curriculum that teaches Linux isolation concepts while teaching Rust. The docs guide you to implement the code yourself; tools stay as TODO scaffolds until you fill them in.
 
 ## Structure Principles
 - Small files (10–50 min each), each ending with a working tool or verification step.
 - Single concept per file; minimal narrative, heavy on “do one thing, verify it.”
 - Rust-first examples; shell commands only for setup/verification.
 - Every concept builds a reusable Rust tool or library function.
+- Docs describe the steps; you write the code yourself from TODO scaffolds.
 
 ## Proposed Top-Level Layout
 - README.md (overview and path index)
