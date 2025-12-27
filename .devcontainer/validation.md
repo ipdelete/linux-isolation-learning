@@ -141,7 +141,82 @@ echo ""
 - cargo should be available
 - rust-analyzer recommended
 
-### 5. Namespace Support
+### 5. eBPF Toolchain
+
+Verify eBPF development tools are installed:
+
+```bash
+echo "=== eBPF Toolchain ==="
+
+check_tool() {
+    if command -v $1 &> /dev/null; then
+        echo "✓ $1: $(command -v $1)"
+    else
+        echo "✗ $1: NOT FOUND"
+    fi
+}
+
+# LLVM/Clang for BPF compilation
+check_tool clang
+check_tool llvm-objcopy
+
+# BPF linker for Rust
+check_tool bpf-linker
+
+# Rust source (required for cross-compilation)
+if rustup component list --installed | grep -q rust-src; then
+    echo "✓ rust-src: installed"
+else
+    echo "✗ rust-src: NOT INSTALLED (run: rustup component add rust-src)"
+fi
+
+echo ""
+```
+
+**Expected**:
+- clang and llvm-objcopy available (LLVM toolchain)
+- bpf-linker installed via cargo
+- rust-src component installed
+
+### 6. eBPF Kernel Support
+
+Verify kernel eBPF features are available:
+
+```bash
+echo "=== eBPF Kernel Support ==="
+
+# Check debugfs mount (required for tracing)
+if [ -d /sys/kernel/debug/tracing ]; then
+    echo "✓ debugfs mounted at /sys/kernel/debug"
+else
+    echo "✗ debugfs NOT mounted"
+fi
+
+# Check BTF (BPF Type Format) availability
+if [ -f /sys/kernel/btf/vmlinux ]; then
+    size=$(stat -c%s /sys/kernel/btf/vmlinux 2>/dev/null || echo "0")
+    echo "✓ BTF vmlinux available ($(numfmt --to=iec $size))"
+else
+    echo "✗ BTF vmlinux NOT found (CO-RE may not work)"
+fi
+
+# Check available kprobes
+if [ -f /sys/kernel/debug/tracing/available_filter_functions ]; then
+    count=$(wc -l < /sys/kernel/debug/tracing/available_filter_functions)
+    echo "✓ Kprobe targets available ($count functions)"
+else
+    echo "✗ Cannot read available kprobe functions"
+fi
+
+echo ""
+```
+
+**Expected**:
+- debugfs mounted (for tracing infrastructure)
+- BTF vmlinux available (for CO-RE - Compile Once, Run Everywhere)
+- Kprobe targets accessible
+
+### 7. Namespace Support
 
 Test each namespace type:
 
@@ -201,7 +276,7 @@ echo ""
 
 **Note**: If you're not running as root, prefix `unshare` with `sudo`.
 
-### 7. Cgroup v2 Support
+### 8. Cgroup v2 Support
 
 Verify cgroup v2 is available:
 
@@ -246,7 +321,7 @@ echo ""
 - Controllers should include: cpu, memory, io, pids
 - Should be able to create test cgroups
 
-### 8. Network Configuration
+### 9. Network Configuration
 
 Verify network tools and capabilities:
 
@@ -300,7 +375,7 @@ echo ""
 - Can create veth pairs
 - Can access iptables NAT table
 
-### 9. BusyBox Validation
+### 10. BusyBox Validation
 
 Verify BusyBox for rootfs lessons:
 
@@ -327,7 +402,7 @@ echo ""
 - BusyBox should be available
 - Should be statically linked (check with: `ldd /bin/busybox`)
 
-### 10. Project Build
+### 11. Project Build
 
 Verify the project builds successfully:
 
@@ -363,7 +438,7 @@ echo ""
 - Project should build without errors
 - Binaries should be created in `target/debug/`
 
-### 11. Run Sample Test
+### 12. Run Sample Test
 
 Execute a simple namespace test from the project:
 
@@ -386,7 +461,7 @@ echo ""
 - `cargo check` should succeed
 - Help output should show available subcommands
 
-### 12. Kernel Feature Check
+### 13. Kernel Feature Check
 
 Verify specific kernel features required by lessons:
 
@@ -475,6 +550,28 @@ echo "Begin with: docs/00-getting-started.md"
 
 **Issue**: BusyBox not statically linked
 - **Solution**: Install static version: `sudo apt-get install -y busybox-static`
+
+**Issue**: bpf-linker not found
+- **Solution**: Install with cargo: `cargo install bpf-linker`
+- **Prereq**: Requires LLVM/clang installed first: `apt-get install -y llvm clang`
+
+**Issue**: rust-src component missing
+- **Solution**: Install with rustup: `rustup component add rust-src`
+- **Note**: Required for cross-compiling to BPF target
+
+**Issue**: /sys/kernel/btf/vmlinux not found
+- **Cause**: Host kernel doesn't have BTF enabled or mount not configured
+- **Verify**: On host, check: `ls -la /sys/kernel/btf/vmlinux`
+- **Solution**: Ensure devcontainer.json has the BTF mount configured
+
+**Issue**: /sys/kernel/debug is empty or not mounted
+- **Cause**: debugfs mount not configured in devcontainer
+- **Solution**: Add to devcontainer.json mounts: `"source=/sys/kernel/debug,target=/sys/kernel/debug,type=bind"`
+- **Note**: Container must run in privileged mode
+
+**Issue**: eBPF programs fail to load with "permission denied"
+- **Cause**: Container lacks CAP_BPF or CAP_SYS_ADMIN
+- **Solution**: Ensure container runs with `--privileged` flag
 
 ---
 

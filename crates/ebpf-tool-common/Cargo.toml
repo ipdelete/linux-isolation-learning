@@ -1,0 +1,18 @@
+[package]
+name = "ebpf-tool-common"
+version = "0.1.0"
+edition = "2021"
+description = "Shared types between ebpf-tool userspace and eBPF programs"
+license = "MIT"
+
+[features]
+default = []
+# Enable std-dependent functionality for userspace code
+user = []
+
+[dependencies]
+# No dependencies by default - keeps the crate minimal for eBPF compatibility
+# The crate is #![no_std] compatible out of the box
+
+[lib]
+path = "src/lib.rs"
