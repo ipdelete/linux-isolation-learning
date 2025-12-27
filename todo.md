@@ -14,16 +14,16 @@
 - [x] docs/00-foundations/06-unsafe-boundaries.md
 
 ## docs/01-namespaces
-- [ ] docs/01-namespaces/01-pid-namespace.md
-- [ ] docs/01-namespaces/02-unshare-vs-clone.md
-- [ ] docs/01-namespaces/03-uts-ipc.md
-- [ ] docs/01-namespaces/04-mount-namespace.md
-- [ ] docs/01-namespaces/05-minimal-rootfs.md
-- [ ] docs/01-namespaces/06-netns-basics.md
-- [ ] docs/01-namespaces/07-veth-bridge.md
-- [ ] docs/01-namespaces/08-netns-nat.md
-- [ ] docs/01-namespaces/09-combine-ns.md
-- [ ] docs/01-namespaces/10-join-existing.md
+- [x] docs/01-namespaces/01-pid-namespace.md
+- [x] docs/01-namespaces/02-unshare-vs-clone.md
+- [x] docs/01-namespaces/03-uts-ipc.md
+- [x] docs/01-namespaces/04-mount-namespace.md
+- [x] docs/01-namespaces/05-minimal-rootfs.md
+- [x] docs/01-namespaces/06-netns-basics.md
+- [x] docs/01-namespaces/07-veth-bridge.md
+- [x] docs/01-namespaces/08-netns-nat.md
+- [x] docs/01-namespaces/09-combine-ns.md
+- [x] docs/01-namespaces/10-join-existing.md
 
 ## docs/02-cgroups
 - [ ] docs/02-cgroups/01-cgv2-basics.md
