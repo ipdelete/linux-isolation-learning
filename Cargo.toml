@@ -12,3 +12,4 @@ anyhow = "1.0"
 clap = { version = "4.5", features = ["derive"] }
 libc = "0.2"
 nix = { version = "0.29", default-features = false, features = ["sched", "mount", "net", "user", "fs", "hostname", "signal", "process"] }
+thiserror = "1.0"

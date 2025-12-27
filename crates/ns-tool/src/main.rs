@@ -1,5 +1,8 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
+
+mod error;
+pub use error::{NamespaceKind, NsError, NsResult};
 
 #[derive(Parser)]
 #[command(name = "ns-tool")]
@@ -103,11 +106,17 @@ fn main() -> Result<()> {
 }
 
 fn print_proc_ns() -> Result<()> {
-    let entries = std::fs::read_dir("/proc/self/ns")?;
+    let ns_path = "/proc/self/ns";
+
+    // Using anyhow's Context trait to add context to errors
+    let entries = std::fs::read_dir(ns_path)
+        .with_context(|| format!("failed to read namespace directory: {}", ns_path))?;
+
     for entry in entries {
-        let entry = entry?;
+        let entry = entry.with_context(|| "failed to read directory entry")?;
         let name = entry.file_name();
-        let target = std::fs::read_link(entry.path())?;
+        let target = std::fs::read_link(entry.path())
+            .with_context(|| format!("failed to read symlink: {}", entry.path().display()))?;
         println!("{} -> {}", name.to_string_lossy(), target.display());
     }
     Ok(())

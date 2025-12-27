@@ -6,12 +6,12 @@
 ## docs/00-foundations
 - [x] docs/00-foundations/00-lesson-template.md
 - [x] docs/00-foundations/00-setup-rust.md
-- [ ] docs/00-foundations/01-rust-syscall-basics.md
-- [ ] docs/00-foundations/02-cli-patterns.md
-- [ ] docs/00-foundations/03-procfs-intro.md
-- [ ] docs/00-foundations/04-permissions-and-sudo.md
-- [ ] docs/00-foundations/05-error-handling.md
-- [ ] docs/00-foundations/06-unsafe-boundaries.md
+- [x] docs/00-foundations/01-rust-syscall-basics.md
+- [x] docs/00-foundations/02-cli-patterns.md
+- [x] docs/00-foundations/03-procfs-intro.md
+- [x] docs/00-foundations/04-permissions-and-sudo.md
+- [x] docs/00-foundations/05-error-handling.md
+- [x] docs/00-foundations/06-unsafe-boundaries.md
 
 ## docs/01-namespaces
 - [ ] docs/01-namespaces/01-pid-namespace.md
