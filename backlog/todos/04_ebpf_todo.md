@@ -37,12 +37,12 @@
 
 Each lesson follows: Write Tests (Red) → Build (Green) → Verify
 
-- [ ] docs/04-ebpf/00-ebpf-setup.md (check_test.rs → Command::Check)
-- [ ] docs/04-ebpf/01-hello-kprobe.md (kprobe_test.rs → kprobe.rs)
-- [ ] docs/04-ebpf/02-reading-data.md (extend kprobe tests → extend kprobe.rs)
-- [ ] docs/04-ebpf/03-maps.md (stats_test.rs → Command::Stats + maps)
-- [ ] docs/04-ebpf/04-perf-events.md (perf_test.rs → perf.rs)
-- [ ] docs/04-ebpf/05-uprobes.md (uprobe_test.rs → uprobe.rs)
-- [ ] docs/04-ebpf/06-tracepoints.md (tracepoint_test.rs → tracepoint.rs)
-- [ ] docs/04-ebpf/07-perf-sampling.md (extend perf_test.rs → extend perf.rs)
-- [ ] docs/04-ebpf/08-combining.md (tracer_test.rs → combined tracer)
+- [x] docs/04-ebpf/00-ebpf-setup.md (check_test.rs → Command::Check)
+- [x] docs/04-ebpf/01-hello-kprobe.md (kprobe_test.rs → kprobe.rs)
+- [x] docs/04-ebpf/02-reading-data.md (extend kprobe tests → extend kprobe.rs)
+- [x] docs/04-ebpf/03-maps.md (stats_test.rs → Command::Stats + maps)
+- [x] docs/04-ebpf/04-perf-events.md (perf_test.rs → perf.rs)
+- [x] docs/04-ebpf/05-uprobes.md (uprobe_test.rs → uprobe.rs)
+- [x] docs/04-ebpf/06-tracepoints.md (tracepoint_test.rs → tracepoint.rs)
+- [x] docs/04-ebpf/07-perf-sampling.md (extend perf_test.rs → extend perf.rs)
+- [x] docs/04-ebpf/08-combining.md (tracer_test.rs → combined tracer)
