@@ -24,7 +24,7 @@ bash scripts/validate-devcontainer.sh
 - `0`: All checks passed
 - `1`: One or more checks failed
 
-For detailed validation steps and troubleshooting, see `../devcontainer-validation.md`.
+For detailed validation steps and troubleshooting, see `../.devcontainer/validation.md`.
 
 ## Adding New Scripts
 

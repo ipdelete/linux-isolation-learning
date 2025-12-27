@@ -44,7 +44,7 @@ The devcontainer is pre-configured with:
 
 If all validation checks pass, skip to the "Install Rust" section below.
 
-For detailed validation steps and troubleshooting, see `devcontainer-validation.md`.
+For detailed validation steps and troubleshooting, see `.devcontainer/validation.md`.
 
 ## Prerequisites
 

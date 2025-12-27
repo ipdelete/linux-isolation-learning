@@ -120,6 +120,6 @@ else
     echo -e "${RED}║   ✗ VALIDATION FAILED ($fail/$total checks failed)          ║${NC}"
     echo -e "${RED}╚════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo "See devcontainer-validation.md for troubleshooting."
+    echo "See .devcontainer/validation.md for troubleshooting."
     exit 1
 fi

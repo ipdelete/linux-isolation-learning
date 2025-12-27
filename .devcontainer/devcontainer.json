@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/rust
 //
 // After the container starts, run: bash scripts/validate-devcontainer.sh
-// For detailed validation steps, see: devcontainer-validation.md
+// For detailed validation steps, see: .devcontainer/validation.md
 //
 // NOTE: This container runs as root ("remoteUser": "root") because:
 // - Almost every lesson requires privileged operations (namespaces, cgroups, network config)
