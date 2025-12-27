@@ -37,9 +37,5 @@
 	],
 	"securityOpt": [
 		"seccomp=unconfined"
-	],
-	"mounts": [
-		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.cargo/registry,target=/usr/local/cargo/registry,type=bind,consistency=cached",
-		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.cargo/git,target=/usr/local/cargo/git,type=bind,consistency=cached"
 	]
 }
