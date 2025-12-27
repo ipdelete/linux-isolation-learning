@@ -65,111 +65,35 @@ echo "+memory +cpu +pids" | sudo tee /sys/fs/cgroup/cgroup.subtree_control
 
 **Test file**: `crates/cgroup-tool/tests/bundle_test.rs`
 
-Create a new test file for multi-resource scenarios:
+The test file already exists with test function stubs. Your task is to implement the test functions.
 
-```rust
-// Tests for multi-resource cgroup bundles (combining memory + CPU + PIDs limits)
-// Lesson: docs/02-cgroups/06-multi-resource.md
-//
-// TDD Workflow:
-// 1. Write the test(s) below FIRST (RED - they will fail)
-// 2. Implement the code in src/main.rs to make tests pass (GREEN)
-// 3. Refactor as needed
-//
-// NOTE: These tests require cgroup v2 and appropriate permissions.
-// Run with: sudo -E cargo test -p cgroup-tool
+### Step 1: Open the Test File
 
-use std::fs;
-use std::process::Command;
+Open `crates/cgroup-tool/tests/bundle_test.rs`. The file contains test stubs for multi-resource scenarios with `todo!()` placeholders and helpful comments.
 
-const CGROUP_ROOT: &str = "/sys/fs/cgroup";
+### Step 2: Implement the Test Functions
 
-// Helper to create a test cgroup using our tool
-fn create_test_cgroup(name: &str) -> std::io::Result<()> {
-    fs::create_dir_all(format!("{}/{}", CGROUP_ROOT, name))
-}
+Replace the `todo!()` calls with actual test implementations. Start with simpler tests:
 
-// Helper to clean up test cgroup
-fn cleanup_test_cgroup(name: &str) {
-    let _ = fs::remove_dir(format!("{}/{}", CGROUP_ROOT, name));
-}
+- **test_apply_memory_cpu_pids_bundle**: Verify applying all three limits together (no `#[ignore]` attribute)
+- **test_controllers_available**: Verify required controllers are available (no `#[ignore]` attribute)
+- Other tests: Remove `#[ignore]` attribute when implementing
 
-#[test]
-fn test_apply_memory_cpu_pids_bundle() {
-    // TODO: Write a test that verifies applying all three limits to one cgroup
-    //
-    // Test approach:
-    // 1. Create test cgroup "test-bundle"
-    // 2. Apply memory limit: 100MB (104857600 bytes)
-    // 3. Apply CPU limit: 50% (50000 100000)
-    // 4. Apply PIDs limit: 20
-    // 5. Verify all three limit files contain correct values
-    // 6. Clean up
-    //
-    // Hints:
-    // - Run cgroup-tool commands sequentially
-    // - Read each limit file to verify
-    // - All limits should be independent (order doesn't matter)
+Example approach for `test_apply_memory_cpu_pids_bundle`:
+1. Create test cgroup directory
+2. Apply memory, CPU, and PIDs limits using the `cgroup-tool` subcommands
+3. Read back each limit file to verify they were set correctly
+4. Clean up the test cgroup
 
-    todo!("Implement test for applying memory + CPU + PIDs bundle")
-}
+### Step 3: Run Tests (Expect Failure)
 
-#[test]
-#[ignore] // Remove after implementing
-fn test_bundle_limits_are_enforced_together() {
-    // TODO: Write an integration test that verifies combined enforcement
-    //
-    // Test approach:
-    // 1. Create cgroup with tight limits (50MB memory, 25% CPU, 10 PIDs)
-    // 2. Attach a stress test process
-    // 3. Verify process is constrained by ALL limits
-    // 4. Check memory.current, cpu.stat, pids.current for enforcement evidence
-    //
-    // This is an advanced integration test
-
-    todo!("Implement integration test for combined limit enforcement")
-}
-
-#[test]
-#[ignore] // Remove after implementing
-fn test_monitoring_multi_resource_cgroup() {
-    // TODO: Write a test that verifies reading all monitoring files
-    //
-    // Test approach:
-    // 1. Create cgroup with limits
-    // 2. Attach process that consumes resources
-    // 3. Read memory.current, cpu.stat, pids.current
-    // 4. Verify all return valid data
-    //
-    // Hints:
-    // - memory.current: current bytes used
-    // - cpu.stat: usage_usec, user_usec, system_usec, nr_throttled, throttled_usec
-    // - pids.current: current process count
-
-    todo!("Implement test for monitoring multi-resource cgroup")
-}
-
-#[test]
-fn test_controllers_available() {
-    // TODO: Write a test that verifies required controllers are available
-    //
-    // Test approach:
-    // 1. Read /sys/fs/cgroup/cgroup.controllers
-    // 2. Verify "memory", "cpu", and "pids" are present
-    //
-    // This is a prerequisite check for the other tests
-
-    todo!("Implement test for controller availability")
-}
-```
-
-Run the tests (expect failure):
+Run the tests and expect failure from `todo!()` macros:
 
 ```bash
 sudo -E cargo test -p cgroup-tool --test bundle_test
 ```
 
-Expected output: Tests fail because they contain `todo!()` macros.
+Expected output: Tests fail because they contain `todo!()` macros (RED phase).
 
 ## Build (Green)
 

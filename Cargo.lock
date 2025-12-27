@@ -280,6 +280,7 @@ dependencies = [
  "assert_cmd",
  "aya",
  "aya-log",
+ "bytes",
  "clap",
  "ebpf-tool-common",
  "env_logger",

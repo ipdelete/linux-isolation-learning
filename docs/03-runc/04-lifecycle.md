@@ -134,7 +134,7 @@ Find the `"args"` line and change it from:
 
 To:
 ```json
-"args": ["sleep", "infinity"]
+"args": ["sleep", "999999"]
 ```
 
 2. **Disable the terminal** (required for create/start without a console socket):
@@ -151,7 +151,7 @@ To:
 
 **Why these changes?**
 
-- `sleep infinity`: Keeps the container running so we can inspect and interact with it
+- `sleep 999999`: Keeps the container running so we can inspect and interact with it (portable across BusyBox and GNU coreutils)
 - `terminal: false`: The `create`/`start` workflow does not allocate a PTY by default. Using `terminal: true` requires a console socket, which adds complexity we do not need for this lesson.
 
 ### Exercise 1: Create and Inspect a Container
@@ -272,12 +272,12 @@ sudo runc exec mycontainer /ps
 Expected output:
 ```
 PID   USER     TIME  COMMAND
-    1 root      0:00 sleep infinity
+    1 root      0:00 sleep 999999
     5 root      0:00 /ps
 ```
 
 Notice:
-- `sleep infinity` is PID 1 (the container init process)
+- `sleep 999999` is PID 1 (the container init process)
 - `/ps` is a new process spawned by exec
 
 **Step 2: Explore the container filesystem**
@@ -521,7 +521,7 @@ sudo runc list
 
 5. **Container immediately stops after start**
    - Cause: The process exited immediately (e.g., `sh` with no TTY, or a command that completes quickly)
-   - Fix: Use a long-running process like `sleep infinity` and ensure `terminal: false` if not providing a PTY
+   - Fix: Use a long-running process like `sleep 999999` and ensure `terminal: false` if not providing a PTY
    - Check container logs if available, or examine the process exit code
 
 6. **`runc start` hangs or times out**

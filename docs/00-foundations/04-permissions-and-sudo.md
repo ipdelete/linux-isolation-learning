@@ -145,17 +145,15 @@ fn test_check_caps_always_shows_user_ns_as_available() {
 cargo test -p ns-tool --test caps_test
 ```
 
-Expected output: Tests fail because the `check-caps` subcommand does not exist yet (RED phase).
+Expected output: Tests fail because the `check-caps` subcommand is not yet implemented (RED phase).
 
-You should see an error like:
+The tests will try to run the `check-caps` subcommand but encounter a panic from the `todo!()` stub:
+
 ```
-error: no tests to run
+thread 'test_check_caps_runs_successfully' panicked at 'Implement check-caps - write tests first!'
 ```
 
-Or if the binary builds but fails:
-```
-Error: "check-caps" is not a valid subcommand
-```
+This is expected and desired - it shows the tests are correctly exercising the CLI.
 
 ## Build (Green)
 

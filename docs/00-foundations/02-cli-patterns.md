@@ -1,7 +1,7 @@
 # 02 CLI Patterns with Clap
 
 ## Goal
-Learn how to build well-structured command-line tools using Rust's `clap` crate with derive macros. You will understand subcommand patterns, argument types, and how to structure your CLI for testability. By the end, you will have implemented tests for the existing `proc` subcommand and understand the CLI architecture used throughout this course.
+Learn how to build well-structured command-line tools using Rust's `clap` crate with derive macros. You will understand subcommand patterns, argument types, help text generation, and error handling. Understand the CLI architecture used throughout this course without reimplementing tests.
 
 **Estimated time**: 30-40 minutes
 
@@ -137,72 +137,67 @@ enum Command {
 }
 ```
 
-## Write Tests (Red)
+## Explore Clap's Help and Error Handling
 
-**Test file**: `crates/ns-tool/tests/proc_test.rs`
+**No test implementation for this lesson.** Instead, we'll explore how clap generates help text and handles errors.
 
-The `proc` subcommand is already implemented. Your task is to write tests that verify its behavior. This teaches you the testing pattern you will use for every subcommand.
+The `proc` subcommand is already implemented. Your task is to understand how clap's derive macros generate CLI behavior without writing additional tests.
 
-### What the tests should verify
+### What You'll Explore
 
-- **Success case**: The command runs successfully and outputs namespace information
-- **Format case**: Output includes namespace types with inode numbers in the expected format
+1. **Help text generation**: How doc comments become CLI help
+2. **Error handling**: How clap validates arguments and reports errors
+3. **Subcommand dispatch**: How the enum structure maps to commands
 
 ### Steps
 
-1. Open `crates/ns-tool/tests/proc_test.rs`
-
-2. Find the first TODO in `test_proc_lists_namespaces`. Replace the `todo!()` with:
+1. Open `crates/ns-tool/src/main.rs` and examine the `Command` enum:
 
 ```rust
-use assert_cmd::Command;
-use predicates::prelude::*;
-
-#[test]
-fn test_proc_lists_namespaces() {
-    let mut cmd = Command::cargo_bin("ns-tool").unwrap();
-    cmd.arg("proc")
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("pid"))
-        .stdout(predicate::str::contains("net"))
-        .stdout(predicate::str::contains("mnt"))
-        .stdout(predicate::str::contains("uts"))
-        .stdout(predicate::str::contains("ipc"));
+#[derive(Subcommand)]
+enum Command {
+    Pid,
+    Uts,
+    Ipc,
+    Mount,
+    Net,
+    User,
+    Cgroup,
+    Time,
+    Setns,
+    Proc,
 }
 ```
 
-3. Find the second TODO in `test_proc_shows_inode_numbers`. Replace the `todo!()` with:
+2. Notice that each variant can have doc comments. Add doc comments to understand how clap generates help:
 
 ```rust
-#[test]
-fn test_proc_shows_inode_numbers() {
-    let mut cmd = Command::cargo_bin("ns-tool").unwrap();
-    cmd.arg("proc")
-        .assert()
-        .success()
-        // Verify the format: namespace -> namespace:[inode]
-        // The inode is a number in brackets
-        .stdout(predicate::str::is_match(r"pid.*\[\d+\]").unwrap());
+#[derive(Subcommand)]
+enum Command {
+    /// Create a new PID namespace and fork a child process
+    Pid,
+    /// Create a new UTS namespace and set hostname
+    Uts,
+    // ... etc
 }
 ```
 
-4. Run the tests (expect success since `proc` is already implemented):
+3. Test clap's help generation:
 
 ```bash
-cargo test -p ns-tool --test proc_test
+cargo run -p ns-tool -- --help
 ```
 
-**Expected output**:
-```
-running 2 tests
-test test_proc_lists_namespaces ... ok
-test test_proc_shows_inode_numbers ... ok
+You should see descriptions for each subcommand.
 
-test result: ok. 2 passed; 0 failed
+4. Test clap's error handling by passing invalid arguments:
+
+```bash
+cargo run -p ns-tool -- invalid-command
+cargo run -p ns-tool -- pid extra-arg
 ```
 
-Wait - the tests pass immediately! This is unusual for TDD, but intentional here: the `proc` subcommand is your **reference implementation**. You are learning the testing pattern by verifying working code. In later lessons, you will write tests first for unimplemented subcommands (true red-green cycle).
+Observe how clap provides helpful error messages.
 
 ## Build (Green)
 
@@ -243,78 +238,30 @@ Command::Proc => print_proc_ns()?,
 
 The `?` propagates any error up to `main()`, which returns it to the caller.
 
-## Verify
+## Verify Your Understanding
 
-**Automated verification**:
+**Test clap's behavior**:
 
-```bash
-cargo test -p ns-tool --test proc_test
-```
-
-All tests should pass.
-
-**Full test suite** (runs all ns-tool tests):
-
-```bash
-cargo test -p ns-tool
-```
-
-Some tests will fail with `todo!()` - this is expected. Only `proc_test` should pass.
-
-**Manual verification**:
-
-```bash
-cargo run -p ns-tool -- proc
-```
-
-You should see output like:
-```
-cgroup -> cgroup:[4026531835]
-ipc -> ipc:[4026531839]
-mnt -> mnt:[4026531841]
-net -> net:[4026531840]
-pid -> pid:[4026531836]
-pid_for_children -> pid:[4026531836]
-time -> time:[4026532448]
-time_for_children -> time:[4026532448]
-user -> user:[4026531837]
-uts -> uts:[4026531838]
-```
-
-**Verify help text**:
-
+1. Run the help command:
 ```bash
 cargo run -p ns-tool -- --help
 ```
 
-You should see all subcommands listed:
-```
-Namespace learning tool (Rust-first rewrite)
-
-Usage: ns-tool <COMMAND>
-
-Commands:
-  pid
-  uts
-  ipc
-  mount
-  net
-  user
-  cgroup
-  time
-  setns
-  proc
-  help    Print this message or the help of the given subcommand(s)
-
-Options:
-  -h, --help  Print help
+2. Test error handling:
+```bash
+cargo run -p ns-tool -- invalid-command
+cargo run -p ns-tool -- proc extra-arg
 ```
 
-## Adding Subcommand Documentation
+3. Examine the error messages - clap generates them automatically.
 
-Notice the help output above shows empty descriptions for subcommands. Clap uses doc comments to generate help text. Update the enum to add descriptions:
+## Exercise: Add Subcommand Documentation
 
-**Exercise** (optional): Add doc comments to the `Command` enum in `main.rs`:
+Enhance clap's help text by adding doc comments to the `Command` enum:
+
+1. Open `crates/ns-tool/src/main.rs`
+
+2. Find the `Command` enum and add doc comments:
 
 ```rust
 #[derive(Subcommand)]
@@ -325,17 +272,29 @@ enum Command {
     Uts,
     /// Create a new IPC namespace
     Ipc,
-    // ...etc
+    /// Create a new mount namespace
+    Mount,
+    /// Create a new network namespace
+    Net,
+    /// Create a new user namespace
+    User,
+    /// Create a new cgroup namespace
+    Cgroup,
+    /// Create a new time namespace
+    Time,
+    /// Join an existing namespace
+    Setns,
+    /// Display current namespace information from /proc
+    Proc,
 }
 ```
 
-After adding doc comments, `--help` will show:
+3. Rebuild and test:
+```bash
+cargo run -p ns-tool -- --help
 ```
-Commands:
-  pid     Create a new PID namespace and fork a child process
-  uts     Create a new UTS namespace and set hostname
-  ...
-```
+
+Notice how clap now displays your doc comments as descriptions in the help output.
 
 ## Structuring for Testability
 
@@ -357,21 +316,14 @@ This lesson does not create any persistent resources. No cleanup needed.
 
 ## Common Errors
 
-1. **`error[E0433]: failed to resolve: use of undeclared crate or module 'predicates'`**
-   - Cause: Missing import in test file
-   - Fix: Add `use predicates::prelude::*;` at the top of the test file
+1. **`error: found argument ... which wasn't expected`**
+   - Cause: Clap detected an unexpected argument
+   - This is clap's error handling working correctly - it validates arguments
+   - Fix: Only pass valid subcommands and arguments
 
-2. **`error: no bin target named 'ns-tool'`**
-   - Cause: Running tests from wrong directory or typo in crate name
-   - Fix: Run from workspace root, verify crate name matches `Cargo.toml`
-
-3. **Test passes but you expected it to fail**
-   - Cause: The `proc` subcommand is already implemented (this is the reference example)
-   - This is intentional for this lesson. Future lessons will have true red-green cycles.
-
-4. **`regex parse error` in `is_match()`**
-   - Cause: Invalid regex syntax in the predicate
-   - Fix: Escape special characters properly. Use raw strings `r"..."` for regex patterns.
+2. **Help text shows no descriptions for subcommands**
+   - Cause: The `Command` enum doesn't have doc comments
+   - Fix: Add `/// Description` comments above each variant
 
 ## Summary
 
@@ -380,19 +332,18 @@ You learned:
 - **Clap derive pattern**: `#[derive(Parser)]` and `#[derive(Subcommand)]` generate CLI parsers from types
 - **Subcommand structure**: Enum variants become subcommands, match arms dispatch to handlers
 - **Argument types**: Flags (`bool`), options (`Option<T>`), and positional arguments
-- **Testing with assert_cmd**: Run the binary as a subprocess, check exit status and output
-- **Predicates**: Use `predicate::str::contains()` and `predicate::str::is_match()` for output assertions
+- **Help text generation**: Doc comments (`/// ...`) automatically become help descriptions
+- **Error handling**: Clap validates arguments and provides helpful error messages automatically
 
 ## Looking Ahead
 
-In the remaining foundation lessons and namespace lessons, you will:
+In the next foundation lesson (03-procfs-intro), you will:
 
-1. Add new subcommands by adding enum variants
-2. Write tests first (red), then implement the handler (green)
-3. Use the same `assert_cmd` pattern for integration tests
-4. Add arguments to subcommands when operations need parameters
+1. Write tests for the existing `proc` subcommand
+2. Learn how to test CLI tools with `assert_cmd` and `predicates`
+3. Understand the `/proc` filesystem structure
 
-The CLI pattern stays consistent throughout the course. Master it here, and you will focus on the interesting parts (namespaces, cgroups, syscalls) in later lessons.
+Then, in later lessons, you'll add new subcommands (PID, UTS, IPC, etc.) and write tests first (red), then implement (green).
 
 ## Notes
 

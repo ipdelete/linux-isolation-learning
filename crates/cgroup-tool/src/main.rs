@@ -48,7 +48,7 @@ fn main() -> Result<()> {
 
     match cli.command {
         // TODO: Implement cgroup creation
-        // Lesson: docs/02-cgroups/01-create-attach.md (part 1)
+        // Lesson: docs/02-cgroups/01-cgv2-basics.md
         // Tests: tests/create_test.rs
         //
         // TDD Steps:
@@ -66,7 +66,7 @@ fn main() -> Result<()> {
         }
 
         // TODO: Implement cgroup deletion
-        // Lesson: docs/02-cgroups/01-create-attach.md (part 3)
+        // Lesson: docs/02-cgroups/01-cgv2-basics.md
         // Tests: tests/delete_test.rs
         //
         // TDD Steps:
@@ -83,7 +83,7 @@ fn main() -> Result<()> {
         }
 
         // TODO: Implement process attachment
-        // Lesson: docs/02-cgroups/01-create-attach.md (part 2)
+        // Lesson: docs/02-cgroups/01-cgv2-basics.md
         // Tests: tests/attach_test.rs
         //
         // TDD Steps:
@@ -137,7 +137,7 @@ fn main() -> Result<()> {
         }
 
         // TODO: Implement PIDs limit setting
-        // Lesson: docs/02-cgroups/04-pids.md
+        // Lesson: docs/02-cgroups/05-pids.md
         // Tests: tests/pids_test.rs
         //
         // TDD Steps:

@@ -20,7 +20,7 @@ fn main() -> Result<()> {
 
     match cli.command {
         // TODO: Implement OCI bundle initialization
-        // Lesson: docs/03-runc/01-bundle.md
+        // Lesson: docs/03-runc/01-oci-bundle.md
         // Tests: tests/init_test.rs
         //
         // TDD Steps:
@@ -45,7 +45,7 @@ fn main() -> Result<()> {
         }
 
         // TODO: Implement config.json display
-        // Lesson: docs/03-runc/01-bundle.md
+        // Lesson: docs/03-runc/01-oci-bundle.md
         // Tests: tests/show_test.rs
         //
         // TDD Steps:

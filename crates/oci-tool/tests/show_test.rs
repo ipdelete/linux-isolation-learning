@@ -1,5 +1,5 @@
 // Tests for the `show` subcommand (displaying config.json)
-// Lesson: docs/03-runc/01-bundle.md
+// Lesson: docs/03-runc/01-oci-bundle.md
 //
 // TDD Workflow:
 // 1. Write the test(s) below FIRST (RED - they will fail)

@@ -392,16 +392,16 @@ Command::Tracepoint {
     log::info!("Duration: {} seconds (0 = until Ctrl+C)", duration);
 
     // Load the eBPF bytecode
-    // The include_bytes_aligned! macro ensures proper 8-byte alignment
+    // The build.rs script places the compiled eBPF program in OUT_DIR
     let ebpf_bytes = include_bytes_aligned!(
-        "../../ebpf-tool-ebpf/target/bpfel-unknown-none/release/tracepoint"
+        concat!(env!("OUT_DIR"), "/ebpf-tool-ebpf")
     );
 
     let mut bpf = Ebpf::load(ebpf_bytes)
         .context("Failed to load eBPF bytecode")?;
 
     // Initialize eBPF logging
-    if let Err(e) = aya_log::EbpfLogger::init(&mut bpf) {
+    if let Err(e) = aya_log::BpfLogger::init(&mut bpf) {
         log::warn!("Failed to initialize eBPF logger: {}", e);
     }
 
@@ -454,14 +454,9 @@ Command::Tracepoint {
 Before running tests, you must compile the eBPF program:
 
 ```bash
-# Navigate to the eBPF crate
-cd /workspaces/linux-isolation-learning/crates/ebpf-tool-ebpf
-
-# Build for the BPF target
-cargo build --target bpfel-unknown-none --release
-
-# Or use cargo-xtask if available
-cargo xtask build-ebpf --release
+# Build the userspace tool (build.rs automatically compiles eBPF programs)
+cd /workspaces/linux-isolation-learning
+cargo build -p ebpf-tool
 ```
 
 ### Part 4: Run the Tests (Expect Success)
@@ -573,7 +568,7 @@ cat /sys/kernel/debug/tracing/events/sched/sched_switch/format
 
 5. **Events not appearing in output**
    - Cause: eBPF logging not initialized or events too infrequent
-   - Fix: Ensure `aya_log::EbpfLogger::init()` is called. Use verbose mode: `cargo run -p ebpf-tool -- -v tracepoint ...`
+   - Fix: Ensure `aya_log::BpfLogger::init()` is called. Use verbose mode: `cargo run -p ebpf-tool -- -v tracepoint ...`
    - Try a high-frequency tracepoint like `sched/sched_switch`
 
 6. **`Invalid argument` when reading tracepoint data**

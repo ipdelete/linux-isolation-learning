@@ -1,5 +1,5 @@
 // Tests for the `create` subcommand (cgroup creation)
-// Lesson: docs/02-cgroups/01-create-attach.md (part 1)
+// Lesson: docs/02-cgroups/01-cgv2-basics.md
 //
 // TDD Workflow:
 // 1. Write the test(s) below FIRST (RED - they will fail)

@@ -464,15 +464,16 @@ Command::Perf { frequency, duration } => {
     println!("Duration: {} seconds", duration);
 
     // Load the eBPF bytecode
+    // The build.rs script places the compiled eBPF program in OUT_DIR
     let ebpf_bytes = include_bytes_aligned!(
-        "../../ebpf-tool-ebpf/target/bpfel-unknown-none/release/ebpf-tool-ebpf"
+        concat!(env!("OUT_DIR"), "/ebpf-tool-ebpf")
     );
 
     let mut bpf = aya::Ebpf::load(ebpf_bytes)
         .context("Failed to load eBPF program")?;
 
     // Initialize aya-log for eBPF logging (optional)
-    if let Err(e) = aya_log::EbpfLogger::init(&mut bpf) {
+    if let Err(e) = aya_log::BpfLogger::init(&mut bpf) {
         log::warn!("Failed to init eBPF logger: {}", e);
     }
 
@@ -595,12 +596,11 @@ tokio = { version = "1", features = ["full"] }
 ### Build and Run Tests
 
 ```bash
-# Build the eBPF program first
-cd /workspaces/linux-isolation-learning/crates/ebpf-tool-ebpf
-cargo build --release --target bpfel-unknown-none
+# Build the userspace tool (build.rs automatically compiles eBPF programs)
+cd /workspaces/linux-isolation-learning
+cargo build -p ebpf-tool
 
 # Run tests
-cd /workspaces/linux-isolation-learning
 sudo -E cargo test -p ebpf-tool --test perf_test
 ```
 

@@ -357,4 +357,4 @@ kill $PID
 - PID namespace isolation should work on any modern Linux distribution
 
 ## Next
-`02-uts-namespace.md` - Create a UTS namespace to isolate hostname and domain name
+`02-unshare-vs-clone.md` - Compare unshare vs clone: two approaches to creating namespaces

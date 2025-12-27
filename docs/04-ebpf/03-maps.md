@@ -6,8 +6,8 @@ Understand eBPF maps as shared data structures between kernel and userspace. You
 
 ## Prereqs
 
-- Completed Lesson 02 (Tracepoints) or familiarity with basic eBPF program structure
-- Understanding of kprobes and how eBPF programs attach to kernel functions
+- Completed 01-hello-kprobe.md (basic kprobe setup and program attachment)
+- Completed 02-reading-data.md (reading kernel data from eBPF programs)
 - `sudo` access (loading eBPF programs requires elevated privileges)
 - Linux kernel 5.8+ with BTF support
 
@@ -56,7 +56,7 @@ eBPF HashMaps support these operations:
 +-------------------+------------------------------------------+
 ```
 
-**Important**: Map operations are atomic. Multiple CPUs can safely update the same map concurrently without explicit locking (the kernel handles synchronization).
+**Important**: Individual map operations like `insert` are atomic. However, compound operations (like "get then increment then insert") are not atomic and can lose updates under concurrent access. For safe atomic increments, use per-CPU maps or kernel-side atomic helpers where available.
 
 ### Sizing Maps
 
@@ -71,7 +71,7 @@ static SYSCALL_COUNTS: HashMap<u64, u64> = HashMap::with_max_entries(10240, 0);
 The `MAX_MAP_ENTRIES` constant (10240) is defined in `ebpf-tool-common`:
 - Large enough for typical workloads
 - Small enough to fit in kernel memory
-- Must be a power of 2 for optimal performance
+- No power-of-two requirement (though powers of 2 may have better hash distribution)
 
 ## Write Tests (Red)
 
@@ -307,6 +307,10 @@ fn try_count_syscalls(ctx: &ProbeContext) -> Result<u32, i64> {
     // On x86_64, this is in the orig_rax register for sys_enter
     let syscall_nr: u64 = unsafe { ctx.arg(0).ok_or(-1i64)? };
 
+    // WARNING: This pattern (get + insert) is NOT atomic and can lose updates
+    // under concurrent access from multiple CPUs. For high-frequency counters,
+    // consider using PerCpuHashMap instead (see example below).
+    //
     // Get current count (or 0 if not present)
     let count = unsafe {
         SYSCALL_COUNTS
@@ -327,6 +331,40 @@ fn try_count_syscalls(ctx: &ProbeContext) -> Result<u32, i64> {
 }
 ```
 
+### Per-CPU Maps for Safe Atomic Counters
+
+For accurate counters without data loss, use `PerCpuHashMap` instead of `HashMap`. Each CPU gets its own map instance, eliminating contention:
+
+```rust
+use aya_ebpf::maps::PerCpuHashMap;
+
+#[map]
+static SYSCALL_COUNTS: PerCpuHashMap<u64, u64> =
+    PerCpuHashMap::with_max_entries(MAX_MAP_ENTRIES, 0);
+
+fn try_count_syscalls(ctx: &ProbeContext) -> Result<u32, i64> {
+    let syscall_nr: u64 = unsafe { ctx.arg(0).ok_or(-1i64)? };
+
+    // This is now safe: each CPU has its own entry, no contention
+    let count = unsafe {
+        SYSCALL_COUNTS
+            .get(&syscall_nr)
+            .copied()
+            .unwrap_or(0)
+    };
+
+    unsafe {
+        SYSCALL_COUNTS
+            .insert(&syscall_nr, &(count + 1), 0)
+            .map_err(|_| -1i64)?;
+    }
+
+    Ok(0)
+}
+```
+
+When reading from userspace, `PerCpuHashMap::iter()` automatically aggregates values from all CPUs.
+
 ### Step 3: Implement the Userspace CLI
 
 **File**: `crates/ebpf-tool/src/main.rs`
@@ -344,6 +382,7 @@ Command::Stats => {
     println!("Loading eBPF program...");
 
     // Load the eBPF bytecode
+    // The build.rs script places the compiled eBPF program in OUT_DIR
     let ebpf_bytes = include_bytes_aligned!(
         concat!(env!("OUT_DIR"), "/ebpf-tool-ebpf")
     );
@@ -472,11 +511,8 @@ fn syscall_name(nr: u64) -> &'static str {
 Before building the userspace tool, you need to compile the eBPF program:
 
 ```bash
-# Build eBPF programs (requires bpf-linker)
-cargo xtask build-ebpf
-
-# Or if you don't have xtask set up:
-cargo build -p ebpf-tool-ebpf --target bpfel-unknown-none -Z build-std=core
+# Build eBPF programs (via build.rs which requires bpf-linker)
+cargo build -p ebpf-tool
 ```
 
 ### Step 5: Build and Test
@@ -687,4 +723,4 @@ sudo bpftool map dump name SYSCALL_COUNTS
 
 ## Next
 
-`04-ringbuf.md` - Use RingBuffer for efficient event streaming from kernel to userspace, replacing PerfEventArray with a more modern approach.
+`04-perf-events.md` - Explore perf events and how to use PerfEventArray maps for efficient per-CPU event streaming from kernel to userspace.

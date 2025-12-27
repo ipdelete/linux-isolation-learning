@@ -253,8 +253,9 @@ Command::CpuMax { path, quota } => {
     }
 
     // Write the quota to cpu.max
-    // The format should be "QUOTA PERIOD" or just "QUOTA" (uses default period)
+    // The format MUST be "QUOTA PERIOD" or "max PERIOD"
     // Examples: "50000 100000" for 50% CPU, "max 100000" for unlimited
+    // Note: Single-value writes (e.g., "50000") may be rejected by the kernel with EINVAL
     fs::write(&cgroup_path, &quota)
         .with_context(|| format!("Failed to write '{}' to {}", quota, cgroup_path))?;
 
@@ -420,9 +421,10 @@ sudo cargo run -p cgroup-tool -- delete cpu-test
 
 2. **`Invalid argument` when writing to cpu.max**
    - Cause: The quota/period format is invalid
-   - Fix: Ensure the format is `QUOTA PERIOD` where both are numbers (or "max" for quota)
-   - Valid examples: `"50000 100000"`, `"max 100000"`, `"100000"`
-   - Invalid examples: `"50%"`, `"50000,100000"`, `"50000/100000"`
+   - Fix: The format MUST be `QUOTA PERIOD` (two values) or `max PERIOD`
+   - Valid examples: `"50000 100000"`, `"max 100000"`
+   - Invalid examples: `"50%"`, `"50000"` (single value), `"50000,100000"`, `"50000/100000"`
+   - Note: Some older kernel documentation mentions single-value writes, but the current kernel requires both period and quota
 
 3. **`Permission denied` when writing to cpu.max**
    - Cause: Not running with root privileges
@@ -446,7 +448,8 @@ sudo cargo run -p cgroup-tool -- delete cpu-test
 - Smaller periods (e.g., 10000 = 10ms) give smoother scheduling but more overhead
 - Larger periods (e.g., 1000000 = 1s) allow longer bursts but can cause latency issues
 - The default period (100000 = 100ms) is a good balance for most workloads
-- You can write just the quota (e.g., `"50000"`) and the kernel uses the existing period
+- You MUST always write both values: `"QUOTA PERIOD"` or `"max PERIOD"`
+- The kernel does NOT accept single-value writes like `"50000"` - you must include the period
 
 **CPU quota vs. CPU shares (cpu.weight):**
 - `cpu.max` sets a **hard limit** - processes cannot exceed this regardless of available CPU

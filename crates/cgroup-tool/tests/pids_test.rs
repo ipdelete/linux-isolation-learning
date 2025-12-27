@@ -1,5 +1,5 @@
 // Tests for the `pids-max` subcommand (process number limits)
-// Lesson: docs/02-cgroups/04-pids.md
+// Lesson: docs/02-cgroups/05-pids.md
 //
 // TDD Workflow:
 // 1. Write the test(s) below FIRST (RED - they will fail)

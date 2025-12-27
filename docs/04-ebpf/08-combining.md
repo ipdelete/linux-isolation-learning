@@ -1045,13 +1045,7 @@ fn syscall_nr_to_name(nr: u64) -> &'static str {
 
 ### Part 3: Build and Test
 
-1. Build the eBPF program:
-
-```bash
-cargo xtask build-ebpf
-```
-
-2. Build the userspace CLI:
+1. Build the userspace CLI (build.rs automatically compiles eBPF programs):
 
 ```bash
 cargo build -p ebpf-tool

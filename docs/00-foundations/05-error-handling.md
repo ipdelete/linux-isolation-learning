@@ -64,11 +64,11 @@ For this project, we use:
 
 **Test file**: `crates/ns-tool/tests/error_test.rs`
 
-We will write tests that verify our error handling behavior. Create the test file with tests for both success and error cases.
+We will write tests that verify our error handling behavior. The test file already exists with TODO stubs waiting to be filled in.
 
-### Step 1: Create the test file
+### Step 1: Review the test file structure
 
-Create a new file at `crates/ns-tool/tests/error_test.rs`:
+Open `crates/ns-tool/tests/error_test.rs` to see the test structure:
 
 ```rust
 // Tests for error handling patterns
@@ -153,30 +153,18 @@ The error types themselves are best tested as unit tests within the module. We w
 
 ## Build (Green)
 
-**Implementation file**: `crates/ns-tool/src/error.rs` (new file)
-**Update file**: `crates/ns-tool/src/main.rs`
+**Implementation file**: `crates/ns-tool/src/error.rs` (already exists with stubs)
+**Update file**: `crates/ns-tool/src/main.rs` (reference to error module)
 
-### Step 1: Add thiserror to dependencies
+### Step 1: Review error module dependencies
 
-First, add `thiserror` to the workspace and crate dependencies.
+The dependencies are already added to `Cargo.toml`:
+- `thiserror` is in `[workspace.dependencies]`
+- The crate already imports `thiserror = { workspace = true }`
 
-Edit `Cargo.toml` (workspace root) to add:
-```toml
-[workspace.dependencies]
-# ... existing deps ...
-thiserror = "1.0"
-```
+### Step 2: Review the error module structure
 
-Edit `crates/ns-tool/Cargo.toml` to add:
-```toml
-[dependencies]
-# ... existing deps ...
-thiserror = { workspace = true }
-```
-
-### Step 2: Create the error module
-
-Create `crates/ns-tool/src/error.rs`:
+Open `crates/ns-tool/src/error.rs` to see the complete error type definitions:
 
 ```rust
 //! Error types for ns-tool
@@ -374,9 +362,9 @@ mod tests {
 }
 ```
 
-### Step 3: Update main.rs to use the error module
+### Step 3: Understand the main.rs integration
 
-Update `crates/ns-tool/src/main.rs` to declare the error module and demonstrate using it:
+The `crates/ns-tool/src/main.rs` already declares the error module and demonstrates how to use it:
 
 ```rust
 use anyhow::{Context, Result};
@@ -470,12 +458,13 @@ use anyhow::{Context, Result};
 fn read_namespace_info(pid: u32) -> Result<String> {
     let path = format!("/proc/{}/ns/pid", pid);
 
-    std::fs::read_link(&path)
-        .with_context(|| format!("failed to read namespace for PID {}", pid))?
+    let ns_path = std::fs::read_link(&path)
+        .with_context(|| format!("failed to read namespace for PID {}", pid))?;
+
+    ns_path
         .to_str()
-        .context("namespace path is not valid UTF-8")?
-        .to_string()
-        .pipe(Ok)
+        .context("namespace path is not valid UTF-8")
+        .map(|s| s.to_string())
 }
 ```
 

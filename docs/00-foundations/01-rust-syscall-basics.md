@@ -2,9 +2,9 @@
 
 ## Goal
 
-Learn how to make Linux system calls from Rust safely and idiomatically. You will implement tests for the `proc` subcommand (which lists namespace information) and understand the fundamental patterns for syscall programming that underpin the entire course.
+Learn how to make Linux system calls from Rust safely and idiomatically. Understand the fundamental patterns for syscall programming that underpin the entire course: when to use `nix` vs `libc` vs `std`, and how Rust's type system prevents common syscall mistakes.
 
-**What you will build**: Working tests that verify the `ns-tool proc` command correctly reads and displays namespace information from `/proc/self/ns`.
+**What you will learn**: How to choose the right tool (`nix`, `libc`, or `std`) for different kernel interactions, and why Rust is better than C for syscalls.
 
 **Estimated time**: 30-40 minutes
 
@@ -105,186 +105,56 @@ The `print_proc_ns()` function you saw in setup doesn't actually use syscalls di
 
 Later lessons will introduce actual namespace syscalls like `unshare()` and `setns()`.
 
-## Write Tests (Red)
+## Deep Dive: Rust's Syscall Options (Instead of Red/Green)
 
-**Test file**: `crates/ns-tool/tests/proc_test.rs`
+Since this lesson focuses on understanding syscall patterns rather than implementing a specific feature, we'll study the existing code to learn.
 
-Now let's write tests for the `proc` subcommand. The implementation already exists (study `src/main.rs` to see `print_proc_ns()`), so this is a great first exercise: you'll write tests for working code, learning the testing patterns before you implement features yourself.
+### Study the Code Pattern
 
-### What the Tests Should Verify
+Open `crates/ns-tool/src/main.rs` and find the `print_proc_ns()` function. This function demonstrates a key pattern: **reading from `/proc` doesn't actually require syscalls** - it just uses `std::fs` for file I/O, which internally calls syscalls like `open`, `read`, and `readlink`.
 
-1. **Success case**: Running `ns-tool proc` should:
-   - Exit with status code 0 (success)
-   - Output namespace names (pid, net, mnt, uts, ipc, user, cgroup)
-   - Show inode numbers in the format `namespace:[number]`
-
-2. **Error case**: Not applicable for this subcommand (reading `/proc/self/ns` should always work on a functioning Linux system)
-
-### Steps
-
-1. Open the test file:
-
-```bash
-# View the current test file with TODOs
-cat crates/ns-tool/tests/proc_test.rs
-```
-
-2. Open `crates/ns-tool/tests/proc_test.rs` in your editor. You'll see two test functions with `todo!()` markers.
-
-3. Replace the first `todo!()` in `test_proc_lists_namespaces`:
-
-```rust
-// Tests for the `proc` subcommand (/proc/self/ns inspection)
-// Lesson: docs/00-foundations/01-rust-syscall-basics.md
-
-use assert_cmd::Command;
-use predicates::prelude::*;
-
-#[test]
-fn test_proc_lists_namespaces() {
-    // Run the ns-tool binary with the "proc" subcommand
-    let mut cmd = Command::cargo_bin("ns-tool").unwrap();
-
-    cmd.arg("proc")
-        .assert()
-        .success()  // Exit code 0
-        .stdout(predicate::str::contains("pid"))
-        .stdout(predicate::str::contains("net"))
-        .stdout(predicate::str::contains("mnt"))
-        .stdout(predicate::str::contains("uts"))
-        .stdout(predicate::str::contains("ipc"))
-        .stdout(predicate::str::contains("user"))
-        .stdout(predicate::str::contains("cgroup"));
-}
-```
-
-**Understanding the test**:
-- `Command::cargo_bin("ns-tool")` finds and runs the compiled binary
-- `.arg("proc")` passes the subcommand argument
-- `.assert()` captures the result for assertions
-- `.success()` verifies exit code 0
-- `.stdout(predicate::str::contains(...))` checks output content
-
-4. Replace the second `todo!()` in `test_proc_shows_inode_numbers`:
-
-```rust
-#[test]
-fn test_proc_shows_inode_numbers() {
-    let mut cmd = Command::cargo_bin("ns-tool").unwrap();
-
-    // Verify the output format: "name -> type:[inode]"
-    // Example: "pid -> pid:[4026531836]"
-    cmd.arg("proc")
-        .assert()
-        .success()
-        // Check for the arrow separator and bracket format
-        .stdout(predicate::str::contains("->"))
-        // Inode numbers are shown in brackets after the namespace type
-        .stdout(predicate::str::is_match(r"\[[\d]+\]").unwrap());
-}
-```
-
-**Understanding the regex**:
-- `\[[\d]+\]` matches `[` followed by one or more digits, followed by `]`
-- This verifies we're showing inode numbers correctly
-
-5. Run the tests (they should now pass since the implementation exists):
-
-```bash
-cargo test -p ns-tool --test proc_test
-```
-
-**Wait - shouldn't tests fail first (RED)?**
-
-Good observation! In this lesson, the implementation already exists as a reference. We're writing tests *after* implementation to learn the testing patterns. Starting in the next lesson (and all future lessons), you'll write tests first, watch them fail, then implement.
-
-Think of this as "training wheels" for the TDD workflow.
-
-### Expected Output
-
-```
-running 2 tests
-test test_proc_lists_namespaces ... ok
-test test_proc_shows_inode_numbers ... ok
-
-test result: ok. 2 passed; 0 failed; 0 ignored
-```
-
-If tests fail, check:
-- Did you add the `use` statements at the top of the file?
-- Is the regex syntax correct (use raw strings `r"..."`)?
-- Does `cargo run -p ns-tool -- proc` work manually?
+This illustrates the decision tree you should follow when choosing how to interact with the kernel.
 
 ## Build (Green)
 
-**Implementation file**: `crates/ns-tool/src/main.rs`
-**Function**: `print_proc_ns()` at line ~105
+**No implementation needed for this lesson.** The code is already written - we're studying it, not writing it.
 
-Since the implementation already exists, this section explains how it works rather than having you write it. Study this code - it demonstrates patterns you'll use throughout the course.
+Open `crates/ns-tool/src/main.rs` and examine `print_proc_ns()`. Note:
 
-### The Implementation Explained
+### The Pattern Explained
 
 ```rust
 fn print_proc_ns() -> Result<()> {
-    // Read directory entries from /proc/self/ns
     let entries = std::fs::read_dir("/proc/self/ns")?;
-
     for entry in entries {
-        // Handle potential I/O errors on each entry
         let entry = entry?;
-
-        // Get the filename (e.g., "pid", "net", "mnt")
         let name = entry.file_name();
-
-        // Each entry is a symlink; read where it points
-        // Example: pid -> pid:[4026531836]
         let target = std::fs::read_link(entry.path())?;
-
-        // Print in a readable format
         println!("{} -> {}", name.to_string_lossy(), target.display());
     }
     Ok(())
 }
 ```
 
-### Key Patterns
+**Why this is instructive**:
 
-**1. Error Propagation with `?`**
+1. **Error propagation with `?`** - Clean, idiomatic Rust error handling
+2. **`anyhow::Result<()>`** - Flexible error type that accepts any error
+3. **No `unsafe` blocks** - Reading files doesn't require unsafe Rust, even though `open()` and `readlink()` are syscalls beneath the surface
+4. **`std::fs` is enough** - We don't need `nix` or `libc` for this operation
 
-```rust
-let entries = std::fs::read_dir("/proc/self/ns")?;
-```
-
-The `?` operator:
-- If the operation succeeds, unwraps the `Ok` value
-- If it fails, returns early from the function with the error
-- This is idiomatic Rust - no manual error checking needed
-
-**2. Using `anyhow::Result`**
-
-```rust
-fn print_proc_ns() -> Result<()> {
-```
-
-The `Result<()>` here is `anyhow::Result<()>`, which can hold any error type. This simplifies error handling when you're calling functions that return different error types.
-
-**3. Reading `/proc` as Files**
-
-Even though `/proc` is a virtual filesystem (the kernel generates its contents on-the-fly), we read it like regular files. This is a common Linux pattern:
-
-- `/proc/self/ns/*` - symlinks to current process's namespaces
-- `/proc/self/cgroup` - current cgroup memberships
-- `/proc/self/status` - process status information
-
-### Why No `nix` or `libc` Here?
+### Why This Doesn't Use `nix` or `libc`
 
 This function uses only `std::fs` because:
 
 1. Reading `/proc` is just file I/O - no special syscalls needed
 2. The kernel exposes namespace information through these virtual files
-3. Rust's standard library handles the underlying syscalls (`open`, `read`, `readlink`)
+3. Rust's standard library handles the underlying syscalls internally
 
-In later lessons, when we *create* namespaces (not just read about them), we'll use `nix` for syscalls like `unshare()`.
+**When you WOULD need `nix` or `libc`**:
+- Creating namespaces: `unshare(CloneFlags::CLONE_NEWPID)` from `nix`
+- Joining namespaces: `setns()` from `nix`
+- Raw syscalls not wrapped by `nix`: `libc::syscall(...)`
 
 ## Deep Dive: When to Use `nix` vs `libc` vs `std`
 
@@ -412,77 +282,43 @@ readlink /proc/self/ns/pid
 # Output: pid:[4026531836]  (same inode = same namespace)
 ```
 
+## Verify Your Understanding
+
+**Study the working implementation**: This lesson has no tests or builds to verify - you're studying patterns instead.
+
+Make sure you can answer these questions:
+
+1. **When should you use `nix` vs `libc` vs `std`?** - Look at the decision tree above.
+2. **Why doesn't `print_proc_ns()` use syscall wrappers?** - Because file I/O through `std::fs` is enough.
+3. **What syscalls WILL you use later?** - `unshare()`, `setns()`, `fork()` - the namespace-creation operations.
+
+You can optionally run the existing tool to see it work:
+
+```bash
+cargo run -p ns-tool -- proc
+```
+
+You should see namespace types with inode numbers. This working code becomes a reference for future lessons.
+
 ## Clean Up
 
 No cleanup needed for this lesson. We only read files, didn't create any resources.
 
 ## Common Errors
 
-### 1. `error[E0432]: unresolved import`
+This lesson is conceptual, so most errors will be from exploring `/proc` manually or examining the code:
 
-**Symptom**:
-```
-error[E0432]: unresolved import `assert_cmd`
-  --> tests/proc_test.rs:1:5
-   |
-1  | use assert_cmd::Command;
-   |     ^^^^^^^^^ use of undeclared crate
-```
+### 1. `No such file or directory: /proc/self/ns/`
 
-**Cause**: Missing `use` statements at the top of the test file.
+**Cause**: Not running on Linux (macOS, Windows, or WSL1).
 
-**Fix**: Ensure your test file starts with:
-```rust
-use assert_cmd::Command;
-use predicates::prelude::*;
-```
+**Fix**: Use a Linux VM, WSL2, or DevContainer. The `/proc` filesystem is Linux-specific.
 
-### 2. `error: expected one of ... found keyword 'use'`
+### 2. `Permission denied` when reading `/proc/[pid]/ns/`
 
-**Symptom**: Syntax errors when adding imports.
+**Cause**: Trying to read another user's process namespaces without permission.
 
-**Cause**: `use` statements placed inside a function instead of at the top of the file.
-
-**Fix**: Move all `use` statements to the top of the file, before any `#[test]` functions.
-
-### 3. Regex Compilation Errors
-
-**Symptom**:
-```
-error: expected expression
-  --> tests/proc_test.rs:15:42
-   |
-15 |     .stdout(predicate::str::is_match(r"[[\d]+]").unwrap());
-   |                                          ^
-```
-
-**Cause**: Incorrect regex escaping.
-
-**Fix**: Use `r"\[[\d]+\]"` - the raw string (`r"..."`) prevents Rust from interpreting backslashes, and we escape the literal brackets.
-
-### 4. Tests Fail with "binary not found"
-
-**Symptom**:
-```
-thread 'test_proc_lists_namespaces' panicked at 'called `Result::unwrap()` on an `Err` value: CargoError(...)'
-```
-
-**Cause**: The binary hasn't been built yet.
-
-**Fix**: Build before testing:
-```bash
-cargo build -p ns-tool
-cargo test -p ns-tool --test proc_test
-```
-
-### 5. Tests Pass Locally but Fail in CI
-
-**Cause**: Different Linux distributions may have different namespace types (e.g., `time` namespace requires kernel 5.6+).
-
-**Fix**: For this lesson, all assertions should work on any modern Linux. If you're on an older kernel, check your kernel version:
-```bash
-uname -r
-```
+**Fix**: Use `sudo` or read only processes you own. `/proc/self/ns/` is always readable.
 
 ## Notes
 
@@ -538,12 +374,12 @@ This becomes important when we create new namespaces: the inode will change, pro
 In this lesson, you learned:
 
 1. **What syscalls are**: How user programs request kernel services
-2. **Rust's syscall options**: `nix` (preferred, type-safe) vs `libc` (raw, requires unsafe)
-3. **Testing patterns**: Using `assert_cmd` and `predicates` to test CLI tools
-4. **Error handling**: Using `?` operator and `anyhow::Result` for clean error propagation
-5. **Reading `/proc`**: How Linux exposes process information through virtual files
+2. **Rust's syscall options**: When to use `nix` (preferred, type-safe) vs `libc` (raw, requires unsafe) vs `std` (safe, when applicable)
+3. **Error handling**: Using `?` operator and `anyhow::Result` for clean error propagation
+4. **Reading `/proc`**: How Linux exposes process information through virtual files
+5. **Safety philosophy**: Why Rust's type system makes syscalls safer than C
 
-You wrote your first tests for `ns-tool`, establishing the patterns you'll use throughout this course.
+You studied the `print_proc_ns()` implementation, which demonstrates these patterns. Next lesson, you'll learn how CLI tools are structured with `clap`.
 
 ## Next
 

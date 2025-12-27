@@ -127,7 +127,7 @@ ls /sys/fs/cgroup/system.slice/ 2>/dev/null | head -5 || echo "No system.slice"
 cd /tmp/runc-cgroup-test
 
 # Create a minimal rootfs using busybox
-mkdir -p rootfs/bin rootfs/proc rootfs/sys
+mkdir -p rootfs/{bin,proc,sys,dev/pts,dev/shm,dev/mqueue,etc,root,run,tmp}
 
 # Copy busybox (adjust path as needed for your system)
 if [ -f /bin/busybox ]; then
@@ -338,7 +338,7 @@ sudo cargo run -q -p cgroup-tool -- pids-max pids-test 5
 **Step 2: Create a test config.json**
 
 ```bash
-mkdir -p /tmp/pids-test-bundle/rootfs/bin
+mkdir -p /tmp/pids-test-bundle/rootfs/{bin,proc,sys,dev/pts,dev/shm,dev/mqueue,etc,root,run,tmp}
 cp /bin/busybox /tmp/pids-test-bundle/rootfs/bin/ 2>/dev/null || echo "Copy busybox manually"
 cd /tmp/pids-test-bundle/rootfs/bin && ln -sf busybox sh && cd /tmp/pids-test-bundle
 

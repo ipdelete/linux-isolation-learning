@@ -22,6 +22,21 @@ Linux namespace and cgroup operations require elevated privileges because they f
 
 Most lessons require `sudo` or root access. For safety, **always use a VM or disposable environment** - never run these exercises on a production system or your primary workstation.
 
+### Important: DevContainer vs. Native Linux
+
+**In the DevContainer**: You are running as `root` (UID 0), so commands in the lessons do **not** need `sudo` prefix. When a lesson shows:
+```bash
+sudo cargo run -p ns-tool -- pid /bin/true
+```
+In the DevContainer, you can simply run:
+```bash
+cargo run -p ns-tool -- pid /bin/true
+```
+
+**On a native Linux system**: You run as a regular user, so you **do** need `sudo` for privileged operations. The `sudo` prefixes in lessons are correct for native Linux environments.
+
+The lessons are written for native Linux users (where `sudo` is needed), but they work identically in the DevContainer (just omit the `sudo`).
+
 ## Running on macOS or Windows?
 
 **If you're on macOS or Windows**, you'll need a Linux environment. The easiest option is to use the included **DevContainer** configuration with VS Code:

@@ -1,13 +1,13 @@
 // Tests for the `proc` subcommand (/proc/self/ns inspection)
-// Lesson: docs/00-foundations/01-setup.md
+// Lesson: docs/00-foundations/03-procfs-intro.md
 //
 // TDD Workflow:
-// 1. Write the test(s) below (RED - they will fail initially)
-// 2. Implement the code in src/main.rs to make tests pass (GREEN)
-// 3. Refactor if needed
+// 1. Write the test(s) below (RED - implement these TODOs)
+// 2. Tests will pass because implementation already exists (GREEN)
+// 3. This teaches testing patterns using an existing implementation
 //
-// This subcommand is already implemented as a reference example.
-// Study this test to understand the pattern before writing your own tests.
+// This is the primary deliverable for lesson 03-procfs-intro.
+// Lessons 01 and 02 focus on understanding concepts, not implementing tests.
 
 #[test]
 fn test_proc_lists_namespaces() {
