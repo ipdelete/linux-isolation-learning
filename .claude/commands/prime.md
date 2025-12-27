@@ -1,1 +1,1 @@
-run git ls-files and read @plan.md
+run git ls-files and read @plan.md and docs/00-foundations/00-lesson-template.md

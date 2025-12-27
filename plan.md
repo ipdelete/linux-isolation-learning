@@ -63,8 +63,4 @@ Goal: Build a Rust-first, test-driven learning path for Linux isolation (namespa
 - Use `docs/00-foundations/00-lesson-template.md` as a reference for consistent lesson structure (this is assistant-only; not a learner-facing lesson).
 
 ## Immediate Next Steps
-1) Make `docs/00-foundations/*` "real" (tight steps, TDD workflow, crisp verification, first debugging patterns).
-2) Make `docs/01-namespaces/01-pid-namespace.md` a complete lesson that:
-   - Instructs you to write the test first
-   - Points you to the TODO(s) for implementation
-   - Does NOT implement the code for you
+See `todo.md` for the current work list. Complete lessons in order, following the numeric sequence within each section.
