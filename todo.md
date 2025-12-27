@@ -34,14 +34,14 @@
 - [x] docs/02-cgroups/06-multi-resource.md
 
 ## docs/03-runc
-- [ ] docs/03-runc/01-oci-bundle.md
-- [ ] docs/03-runc/02-config-json.md
-- [ ] docs/03-runc/03-run-basic.md
-- [ ] docs/03-runc/04-lifecycle.md
-- [ ] docs/03-runc/05-seccomp.md
-- [ ] docs/03-runc/06-network-integration.md
-- [ ] docs/03-runc/07-cgroups-integration.md
+- [x] docs/03-runc/01-oci-bundle.md
+- [x] docs/03-runc/02-config-json.md
+- [x] docs/03-runc/03-run-basic.md
+- [x] docs/03-runc/04-lifecycle.md
+- [x] docs/03-runc/05-seccomp.md
+- [x] docs/03-runc/06-network-integration.md
+- [x] docs/03-runc/07-cgroups-integration.md
 
 ## docs/90-appendix
-- [ ] docs/90-appendix/01-rust-syscall-cheatsheet.md
-- [ ] docs/90-appendix/02-troubleshooting.md
+- [x] docs/90-appendix/01-rust-syscall-cheatsheet.md
+- [x] docs/90-appendix/02-troubleshooting.md
