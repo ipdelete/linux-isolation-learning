@@ -17,13 +17,13 @@
 - [x] crates/ebpf-tool/src/main.rs (Command enum with todo!() for each subcommand)
 
 ### crates/ebpf-tool tests (test files with todo!() stubs)
-- [ ] crates/ebpf-tool/tests/check_test.rs (lesson 00)
-- [ ] crates/ebpf-tool/tests/kprobe_test.rs (lessons 01-02)
-- [ ] crates/ebpf-tool/tests/stats_test.rs (lesson 03)
-- [ ] crates/ebpf-tool/tests/perf_test.rs (lessons 04, 07)
-- [ ] crates/ebpf-tool/tests/uprobe_test.rs (lesson 05)
-- [ ] crates/ebpf-tool/tests/tracepoint_test.rs (lesson 06)
-- [ ] crates/ebpf-tool/tests/tracer_test.rs (lesson 08)
+- [x] crates/ebpf-tool/tests/check_test.rs (lesson 00)
+- [x] crates/ebpf-tool/tests/kprobe_test.rs (lessons 01-02)
+- [x] crates/ebpf-tool/tests/stats_test.rs (lesson 03)
+- [x] crates/ebpf-tool/tests/perf_test.rs (lessons 04, 07)
+- [x] crates/ebpf-tool/tests/uprobe_test.rs (lesson 05)
+- [x] crates/ebpf-tool/tests/tracepoint_test.rs (lesson 06)
+- [x] crates/ebpf-tool/tests/tracer_test.rs (lesson 08)
 
 ### crates/ebpf-tool-ebpf (eBPF programs with todo!() stubs)
 - [ ] crates/ebpf-tool-ebpf/Cargo.toml
