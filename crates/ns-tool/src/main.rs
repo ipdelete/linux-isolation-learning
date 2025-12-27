@@ -27,15 +27,75 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Command::Pid => println!("todo: implement PID namespace example"),
-        Command::Uts => println!("todo: implement UTS namespace example"),
-        Command::Ipc => println!("todo: implement IPC namespace example"),
-        Command::Mount => println!("todo: implement mount namespace example"),
-        Command::Net => println!("todo: implement network namespace example"),
-        Command::User => println!("todo: implement user namespace example"),
-        Command::Cgroup => println!("todo: implement cgroup namespace example"),
-        Command::Time => println!("todo: implement time namespace example"),
-        Command::Setns => println!("todo: implement setns example"),
+        // TODO: Implement PID namespace subcommand
+        // Lesson: docs/01-namespaces/01-pid-namespace.md
+        // Tests: tests/pid_test.rs
+        //
+        // TDD Steps:
+        // 1. First, write tests in tests/pid_test.rs (RED)
+        // 2. Then implement this function to make tests pass (GREEN)
+        // 3. Refactor as needed
+        //
+        // Implementation hints:
+        // - Use nix::sched::unshare(CloneFlags::CLONE_NEWPID)
+        // - Fork a child process with nix::unistd::fork()
+        // - In child: getpid() should return 1
+        // - Print "PID inside namespace: {pid}"
+        Command::Pid => todo!("Implement PID namespace - write tests first!"),
+
+        // TODO: Implement UTS namespace subcommand
+        // Lesson: docs/01-namespaces/02-uts-namespace.md
+        // Tests: tests/uts_test.rs
+        //
+        // TDD Steps:
+        // 1. Write tests in tests/uts_test.rs (RED)
+        // 2. Implement this function (GREEN)
+        // 3. Refactor as needed
+        //
+        // Implementation hints:
+        // - Use nix::sched::unshare(CloneFlags::CLONE_NEWUTS)
+        // - Use nix::unistd::sethostname() to set custom hostname
+        // - Print old and new hostnames to verify isolation
+        Command::Uts => todo!("Implement UTS namespace - write tests first!"),
+
+        // TODO: Implement IPC namespace subcommand
+        // Lesson: docs/01-namespaces/03-ipc-namespace.md
+        // Tests: tests/ipc_test.rs
+        Command::Ipc => todo!("Implement IPC namespace - write tests first!"),
+
+        // TODO: Implement mount namespace subcommand
+        // Lesson: docs/01-namespaces/04-mount-namespace.md
+        // Tests: tests/mount_test.rs
+        Command::Mount => todo!("Implement mount namespace - write tests first!"),
+
+        // TODO: Implement network namespace subcommand
+        // Lesson: docs/01-namespaces/05-network-namespace.md
+        // Tests: (network tests are in netns-tool crate)
+        // Note: For basic network namespace creation, see netns-tool
+        Command::Net => todo!("Implement network namespace - write tests first!"),
+
+        // TODO: Implement user namespace subcommand
+        // Lesson: docs/01-namespaces/06-user-namespace.md
+        // Tests: tests/user_test.rs
+        Command::User => todo!("Implement user namespace - write tests first!"),
+
+        // TODO: Implement cgroup namespace subcommand
+        // Lesson: docs/01-namespaces/07-cgroup-namespace.md
+        // Tests: (cgroup tests are in cgroup-tool crate)
+        Command::Cgroup => todo!("Implement cgroup namespace - write tests first!"),
+
+        // TODO: Implement time namespace subcommand
+        // Lesson: docs/01-namespaces/08-time-namespace.md
+        // Tests: (add tests/time_test.rs when implementing)
+        Command::Time => todo!("Implement time namespace - write tests first!"),
+
+        // TODO: Implement setns subcommand (joining existing namespaces)
+        // Lesson: docs/01-namespaces/09-setns.md
+        // Tests: tests/setns_test.rs
+        Command::Setns => todo!("Implement setns - write tests first!"),
+
+        // This is already implemented as a reference example
+        // Study this before implementing other subcommands
         Command::Proc => print_proc_ns()?,
     }
 
