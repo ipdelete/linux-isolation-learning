@@ -28,9 +28,15 @@ cargo build -q
 cargo run -q -p ns-tool -- proc
 ```
 
+## Common Errors
+- TBD (to be filled in based on learner experience)
+
 ## Notes
 - Prefer: build as your user, then run binaries with `sudo` when required:
   - build: `cargo build -q -p ns-tool`
   - run: `sudo ./target/debug/ns-tool <subcommand>`
 - If `cargo build` fails due to missing linker/toolchain, install a C toolchain (e.g., `build-essential` or `base-devel`).
-- Later lessons also assume common Linux tooling is installed (`unshare`, `nsenter`, `ip`, `iptables`/`nft`), but we’ll call that out when needed.
+- Later lessons also assume common Linux tooling is installed (`unshare`, `nsenter`, `ip`, `iptables`/`nft`), but we'll call that out when needed.
+
+## Next
+- `01-rust-syscall-basics.md`

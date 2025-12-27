@@ -3,5 +3,8 @@
 ## Goal
 - Quick reference for common namespace + cgroup syscalls.
 
+## Contents
+- TBD: This will be filled as we implement each tool.
+
 ## Notes
-- This will be filled as we implement each tool.
+- Reference material - not a lesson with tests/implementation.

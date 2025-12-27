@@ -1,8 +1,11 @@
 # Rewrite TODO (Rust-first)
 
+## Getting Started
+- [ ] docs/00-getting-started.md (prerequisites: Linux kernel version, sudo access, required packages, editor setup)
+
 ## docs/00-foundations
-- [ ] docs/00-foundations/00-lesson-template.md
-- [ ] docs/00-foundations/00-setup-rust.md
+- [x] docs/00-foundations/00-lesson-template.md
+- [x] docs/00-foundations/00-setup-rust.md
 - [ ] docs/00-foundations/01-rust-syscall-basics.md
 - [ ] docs/00-foundations/02-cli-patterns.md
 - [ ] docs/00-foundations/03-procfs-intro.md
