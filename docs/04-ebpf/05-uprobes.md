@@ -613,7 +613,7 @@ sudo -E cargo run -p ebpf-tool -- uprobe ...
 **Cause**: The eBPF bytecode was not built or the program name does not match.
 
 **Fix**:
-- Rebuild the eBPF program: `cargo xtask build-ebpf --release`
+- Rebuild the userspace tool (build.rs compiles eBPF): `cargo build -p ebpf-tool`
 - Verify the function is annotated with `#[uprobe]`
 - Ensure the function name in `.program_mut("hello_uprobe")` matches the Rust function name
 

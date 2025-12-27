@@ -9,7 +9,7 @@ Learn to extract meaningful data from kprobe context and send structured events 
 - Completed [Lesson 01: Hello Kprobe](./01-hello-kprobe.md)
 - Understanding of kprobe basics and the Aya framework
 - `sudo` access for loading eBPF programs
-- Rust toolchain with `cargo-bpf` or `xtask build-ebpf` working
+- Rust toolchain with `bpf-linker` installed (build.rs compiles eBPF)
 
 ## Concepts
 
@@ -455,7 +455,7 @@ RUST_LOG=debug sudo -E cargo run -p ebpf-tool -- kprobe do_sys_openat2 -d 5
 
 **Fix**:
 - Check the `#[kprobe]` function is named `syscall_kprobe`
-- Verify you rebuilt the eBPF program: `cargo xtask build-ebpf`
+- Verify you rebuilt the userspace tool (build.rs compiles eBPF): `cargo build -p ebpf-tool`
 
 ### 3. "invalid argument" when attaching kprobe
 
