@@ -21,4 +21,4 @@ clean:
 	cargo clean
 
 # Run all checks
-all: fmt clippy check build
+all: fmt clippy check clean

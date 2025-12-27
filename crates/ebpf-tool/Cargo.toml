@@ -1,0 +1,13 @@
+[package]
+name = "ebpf-tool"
+version = "0.1.0"
+edition = "2021"
+description = "CLI tool for eBPF tracing tutorials"
+license = "MIT"
+
+[[bin]]
+name = "ebpf-tool"
+path = "src/main.rs"
+
+[dependencies]
+# TODO: Add dependencies as lessons progress
