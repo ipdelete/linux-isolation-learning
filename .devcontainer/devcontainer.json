@@ -1,0 +1,41 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/rust
+//
+// After the container starts, run: bash scripts/validate-devcontainer.sh
+// For detailed validation steps, see: .devcontainer/validation.md
+//
+// NOTE: This container runs as root ("remoteUser": "root") because:
+// - Almost every lesson requires privileged operations (namespaces, cgroups, network config)
+// - Running as root eliminates the need to prefix every command with sudo
+// - The container is isolated from your host, so running as root inside is safe for learning
+// - This is a teaching environment, not production (where you wouldn't run as root)
+{
+	"name": "Rust",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/rust:2-1-trixie",
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {},
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers-extra/features/claude-code:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"rust-lang.rust-analyzer",
+				"vadimcn.vscode-lldb",
+				"serayuzgur.crates",
+				"tamasfe.even-better-toml"
+			]
+		}
+	},
+	"postCreateCommand": "apt-get update && apt-get install -y cgroup-tools strace util-linux iproute2 iptables iputils-ping busybox-static sudo",
+	"remoteUser": "root",
+	"runArgs": [
+		"--privileged",
+		"--cap-add=SYS_PTRACE"
+	],
+	"securityOpt": [
+		"seccomp=unconfined"
+	]
+}

@@ -1,20 +1,6 @@
 ---
-model: haiku
+description: Load repo context (files, plan, template)
+allowed-tools: Bash(git ls-files), Read
 ---
 
-# Prime Command
-
-Get an overview of the project by listing all tracked files and reading the README.
-
-## Project Files
-
-Here are all the tracked files in the repository:
-
-git ls-files
-
-## Project Overview
-
-@README.md
-
-## Report
-ONLY say: "I'm primed and ready to go!"
+run git ls-files and read @plan.md and docs/00-foundations/00-lesson-template.md
