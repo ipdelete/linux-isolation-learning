@@ -267,11 +267,11 @@ Now we'll implement the `chroot` subcommand to make our tests pass. This involve
 
 ### Step 1: Update the Command enum
 
-First, we need to change the `Mount` command to `Chroot` with arguments:
+First, we need to add a new `Chroot` command to the enum (keep the existing `Mount` command from lesson 04):
 
 1. Open `crates/ns-tool/src/main.rs`
 
-2. Update the Command enum (around line 15):
+2. Update the Command enum (around line 15) by adding the Chroot variant after Mount:
 
 ```rust
 #[derive(Subcommand)]
@@ -279,7 +279,7 @@ enum Command {
     Pid,
     Uts,
     Ipc,
-    // Mount,  // Remove or comment out the old Mount variant
+    Mount,  // Keep this from lesson 04 - it demonstrates basic mount namespace
 
     /// Create a mount namespace with a minimal rootfs and pivot into it
     #[command(name = "chroot")]
@@ -302,6 +302,8 @@ enum Command {
 - `#[arg(last = true)]`: Captures all remaining arguments after `--`
 - `Vec<String>`: Allows running custom commands like `ls /` or `busybox ps`
 - Default to `/bin/sh` if no command specified
+
+**Note**: We keep the `Mount` command from lesson 04 because it teaches a foundational concept - creating a mount namespace and demonstrating mount isolation. Lesson 05 builds on this by adding a new `Chroot` command that goes further, using `pivot_root` to create a complete isolated filesystem. Both are valuable learning experiences.
 
 ### Step 2: Create the rootfs module
 
@@ -795,7 +797,7 @@ mod pivot;
 mod mounts;
 ```
 
-2. Update the Command::Chroot match arm (replace the `Command::Mount` TODO):
+2. Add a new match arm for `Command::Chroot` (keep the existing `Command::Mount` arm unchanged):
 
 ```rust
 Command::Chroot { command } => {
@@ -1273,6 +1275,19 @@ You built a `chroot` subcommand that creates a complete isolated filesystem envi
 - A minimal Linux system needs surprisingly little (1-2MB with busybox)
 - Mount namespaces + pivot_root = filesystem container
 - This is fundamentally how Docker/Podman isolate filesystems
+
+## Relationship to Lesson 04
+
+This lesson builds on lesson 04 (Mount Namespace):
+
+- **Lesson 04** teaches how to create a mount namespace and demonstrates mount isolation with a simple tmpfs mount
+- **Lesson 05** (this lesson) extends that knowledge by adding a complete isolated filesystem with `pivot_root`
+
+Both commands coexist in the CLI:
+- `ns-tool mount`: Simple mount namespace isolation (lesson 04)
+- `ns-tool chroot`: Complete filesystem isolation with pivot_root (lesson 05)
+
+This is intentional - the `mount` command remains a useful standalone example, while the `chroot` command demonstrates a production-like container filesystem. Keeping both allows learners to understand the progression from simple namespace isolation to complete filesystem isolation.
 
 ## Next
 

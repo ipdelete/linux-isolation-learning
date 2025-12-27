@@ -84,8 +84,13 @@ runc spec
 Verify the bundle works without seccomp:
 
 ```bash
-# Run a simple command
-sudo runc run --rm test-no-seccomp <<< "echo 'Bundle works!'"
+# Run a simple container
+sudo runc run test-no-seccomp
+# Inside container, type:
+echo 'Bundle works!'
+exit
+# Clean up
+sudo runc delete -f test-no-seccomp
 ```
 
 ### Exercise 1: Block a Specific Syscall (Denylist)
@@ -140,11 +145,13 @@ cat config.json | jq '.linux.seccomp = {
 **Step 3**: Test that normal commands still work:
 
 ```bash
-sudo runc run --rm seccomp-test1
+sudo runc run seccomp-test1
 # Inside container:
 echo "Hello from seccomp container"
 ls /
 exit
+# Clean up
+sudo runc delete -f seccomp-test1
 ```
 
 Expected: Commands work normally because most syscalls are allowed.
@@ -153,9 +160,12 @@ Expected: Commands work normally because most syscalls are allowed.
 
 ```bash
 # The reboot command uses the reboot() syscall
-sudo runc run --rm seccomp-test2
+sudo runc run seccomp-test2
 # Inside container:
 reboot
+exit
+# Clean up
+sudo runc delete -f seccomp-test2
 ```
 
 Expected output:
@@ -180,18 +190,31 @@ Note: We use `SCMP_ACT_KILL_PROCESS` (kills the entire process) rather than `SCM
 **Step 2**: Test:
 
 ```bash
-sudo runc run --rm seccomp-kill-test
+sudo runc run seccomp-kill-test
 # Inside container:
 reboot
 ```
 
 Expected: The container exits immediately with no error message (killed by SIGSYS).
 
-Check the exit status:
+Clean up:
 
 ```bash
-sudo runc run --rm seccomp-kill-test2 sh -c 'reboot; echo "This will not print"'
+sudo runc delete -f seccomp-kill-test
+```
+
+To check the exit status, we need to modify config.json to run reboot directly. First, save the current seccomp config:
+
+```bash
+# Update config.json to run reboot directly (instead of using /bin/sh as init)
+cat config.json | jq '.process.args = ["/bin/reboot"]' > config.json.tmp && mv config.json.tmp config.json
+
+sudo runc run seccomp-kill-test2
+# The container will exit immediately (killed by SIGSYS)
 echo "Exit code: $?"
+
+# Restore the original process.args
+runc spec  # Regenerate to get /bin/sh
 ```
 
 Expected exit code: 137 (128 + 9, killed by signal).
@@ -220,12 +243,35 @@ cat config.json | jq '.linux.seccomp.syscalls = [
 
 **Test**:
 
+First, restore the original process.args if you modified it:
+
 ```bash
-sudo runc run --rm seccomp-multi-test
+runc spec  # Regenerate config.json with /bin/sh
+```
+
+Then run the test:
+
+```bash
+# Re-apply the multi-syscall seccomp rules
+cat config.json | jq '.linux.seccomp.syscalls = [
+  {
+    "names": ["reboot", "swapon", "swapoff", "mount", "umount2", "pivot_root"],
+    "action": "SCMP_ACT_ERRNO",
+    "errnoRet": 1
+  },
+  {
+    "names": ["kexec_load", "kexec_file_load"],
+    "action": "SCMP_ACT_KILL_PROCESS"
+  }
+]' > config.json.tmp && mv config.json.tmp config.json
+
+sudo runc run seccomp-multi-test
 # Inside container:
 mount -t proc proc /proc    # Should fail with EPERM
 reboot                      # Should fail with EPERM
 exit
+# Clean up
+sudo runc delete -f seccomp-multi-test
 ```
 
 ### Exercise 4: Allowlist (Default Deny)
@@ -268,23 +314,31 @@ cat config.json | jq '.linux.seccomp = {
 **Step 2**: Test basic functionality:
 
 ```bash
-sudo runc run --rm seccomp-allowlist
+sudo runc run seccomp-allowlist
 # Inside container:
 echo "Basic commands work"
 ls /
 cat /etc/hostname
 exit
+# Clean up
+sudo runc delete -f seccomp-allowlist
 ```
 
 **Step 3**: Verify that unlisted syscalls fail:
 
 ```bash
-sudo runc run --rm seccomp-allowlist2
+sudo runc run seccomp-allowlist2
 # Inside container - try something that needs network syscalls:
 ping localhost   # Should fail (socket syscall not allowed)
 ```
 
 Expected: `ping: socket: Operation not permitted`
+
+Clean up:
+
+```bash
+sudo runc delete -f seccomp-allowlist2
+```
 
 ### Exercise 5: Debug with SCMP_ACT_LOG
 
@@ -306,10 +360,20 @@ cat config.json | jq '.linux.seccomp = {
 }' > config.json.tmp && mv config.json.tmp config.json
 ```
 
-**Step 1**: Run a command in the container:
+**Step 1**: Run a command in the container. Since we can't pass a command override after the container ID, we'll use `runc exec` to run commands inside the container while it's running:
 
 ```bash
-sudo runc run --rm seccomp-log-test sh -c 'ls / && echo done'
+# First, start the container in the background
+sudo runc run -d seccomp-log-test
+
+# Give it a moment to start
+sleep 1
+
+# Now execute commands inside the running container
+sudo runc exec seccomp-log-test sh -c 'ls / && echo done'
+
+# Stop the container
+sudo runc delete -f seccomp-log-test
 ```
 
 **Step 2**: Check the audit log:
@@ -352,7 +416,12 @@ cat config.json | jq '.linux.seccomp = {
   "syscalls": [{"names": ["reboot"], "action": "SCMP_ACT_ERRNO", "errnoRet": 1}]
 }' > config.json.tmp && mv config.json.tmp config.json
 
-OUTPUT=$(sudo runc run --rm test-v1 sh -c 'reboot 2>&1 || true')
+# Use runc run + runc exec pattern
+sudo runc run -d test-v1
+sleep 1
+OUTPUT=$(sudo runc exec test-v1 sh -c 'reboot 2>&1 || true')
+sudo runc delete -f test-v1
+
 if echo "$OUTPUT" | grep -q "not permitted\|Operation not permitted"; then
     echo "PASS: reboot blocked with EPERM"
 else
@@ -361,7 +430,18 @@ else
 fi
 
 echo "=== Test 2: Normal commands still work ==="
-OUTPUT=$(sudo runc run --rm test-v2 sh -c 'echo hello && ls / | head -1')
+# First, reset to allow all syscalls
+cat config.json | jq '.linux.seccomp = {
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "architectures": ["SCMP_ARCH_X86_64"],
+  "syscalls": []
+}' > config.json.tmp && mv config.json.tmp config.json
+
+sudo runc run -d test-v2
+sleep 1
+OUTPUT=$(sudo runc exec test-v2 sh -c 'echo hello && ls / | head -1')
+sudo runc delete -f test-v2
+
 if [ -n "$OUTPUT" ]; then
     echo "PASS: Normal commands work"
 else
@@ -374,7 +454,11 @@ cat config.json | jq '.linux.seccomp.syscalls = [
   {"names": ["reboot", "mount"], "action": "SCMP_ACT_ERRNO", "errnoRet": 1}
 ]' > config.json.tmp && mv config.json.tmp config.json
 
-OUTPUT=$(sudo runc run --rm test-v3 sh -c 'mount -t proc proc /proc 2>&1 || true')
+sudo runc run -d test-v3
+sleep 1
+OUTPUT=$(sudo runc exec test-v3 sh -c 'mount -t proc proc /proc 2>&1 || true')
+sudo runc delete -f test-v3
+
 if echo "$OUTPUT" | grep -q "not permitted\|Operation not permitted"; then
     echo "PASS: mount blocked"
 else

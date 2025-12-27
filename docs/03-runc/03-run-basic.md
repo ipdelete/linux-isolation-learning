@@ -626,15 +626,57 @@ sudo runc run --bundle ./my-bundle mycontainer
 - Error during process startup
 
 **Fix**:
+
+First, check if terminal mode is enabled:
+
 ```bash
-# Check if terminal mode is enabled
 grep -A2 '"terminal"' config.json
 # Should show: "terminal": true
+```
 
-# Try running a command that produces output
-sudo runc run --bundle ./my-bundle test -- /bin/ls /
+To run a diagnostic command like `ls /`, you need to modify config.json to change `process.args`:
 
-# Check container logs (if any)
+```bash
+# Edit config.json and change the process.args section from:
+#   "args": ["sh"]
+# to:
+#   "args": ["/bin/ls", "/"]
+
+# Use a text editor or jq:
+jq '.process.args = ["/bin/ls", "/"]' config.json > config.json.tmp && mv config.json.tmp config.json
+
+# Then run the container
+cd ./my-bundle
+sudo runc run diagnostic-test
+
+# After running, change it back:
+jq '.process.args = ["sh"]' config.json > config.json.tmp && mv config.json.tmp config.json
+```
+
+**Alternative: Use runc exec for debugging**
+
+If you want to run commands without modifying config.json, use the create + start + exec workflow:
+
+```bash
+cd ./my-bundle
+
+# Create the container (does not start it yet)
+sudo runc create mycontainer
+
+# Start the container with your normal shell
+sudo runc start mycontainer &
+
+# In another terminal, execute a command inside the running container
+sudo runc exec mycontainer /bin/ls /
+
+# Kill and clean up
+sudo runc kill mycontainer SIGKILL
+sudo runc delete mycontainer
+```
+
+Check container state:
+
+```bash
 sudo runc list
 ```
 
