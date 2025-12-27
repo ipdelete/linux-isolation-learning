@@ -6,8 +6,8 @@ Understand eBPF maps as shared data structures between kernel and userspace. You
 
 ## Prereqs
 
-- Completed Lesson 02 (Tracepoints) or familiarity with basic eBPF program structure
-- Understanding of kprobes and how eBPF programs attach to kernel functions
+- Completed 01-hello-kprobe.md (basic kprobe setup and program attachment)
+- Completed 02-reading-data.md (reading kernel data from eBPF programs)
 - `sudo` access (loading eBPF programs requires elevated privileges)
 - Linux kernel 5.8+ with BTF support
 
@@ -725,4 +725,4 @@ sudo bpftool map dump name SYSCALL_COUNTS
 
 ## Next
 
-`04-ringbuf.md` - Use RingBuffer for efficient event streaming from kernel to userspace, replacing PerfEventArray with a more modern approach.
+`04-perf-events.md` - Explore perf events and how to use PerfEventArray maps for efficient per-CPU event streaming from kernel to userspace.

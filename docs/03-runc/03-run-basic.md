@@ -81,14 +81,17 @@ We will create a fresh bundle for this lesson:
 
 ```bash
 # Create the bundle and rootfs directories
-mkdir -p ./my-bundle/rootfs/{bin,proc,sys,dev,tmp,etc,root}
+mkdir -p ./my-bundle/rootfs/{bin,proc,sys,dev/pts,dev/shm,dev/mqueue,tmp,etc,root,run}
 
 # Verify the structure
 ls -la ./my-bundle/
 # Should show: rootfs/
 
 ls -la ./my-bundle/rootfs/
-# Should show: bin/ dev/ etc/ proc/ root/ sys/ tmp/
+# Should show: bin/ dev/ etc/ proc/ root/ run/ sys/ tmp/
+
+ls -la ./my-bundle/rootfs/dev/
+# Should show: pts/ shm/ mqueue/
 ```
 
 ### Step 3: Download and install BusyBox

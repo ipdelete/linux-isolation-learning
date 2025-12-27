@@ -218,7 +218,7 @@ cd ~/oci-netns-test
 runc spec
 
 # Create minimal rootfs with networking tools
-mkdir -p rootfs/bin rootfs/proc rootfs/sys rootfs/etc
+mkdir -p rootfs/{bin,proc,sys,dev/pts,dev/shm,dev/mqueue,etc,root,run,tmp}
 
 # Copy busybox for testing (provides ip, ping, sh)
 cp /bin/busybox rootfs/bin/
@@ -359,7 +359,7 @@ See what happens when runc creates its own network namespace.
 mkdir -p ~/oci-newnetns-test
 cd ~/oci-newnetns-test
 runc spec
-mkdir -p rootfs/bin rootfs/proc rootfs/sys
+mkdir -p rootfs/{bin,proc,sys,dev/pts,dev/shm,dev/mqueue,etc,root,run,tmp}
 cp /bin/busybox rootfs/bin/
 # Or copy Alpine rootfs as before
 ```
