@@ -1,0 +1,14 @@
+[workspace]
+members = [
+  "crates/ns-tool",
+  "crates/netns-tool",
+  "crates/cgroup-tool",
+  "crates/oci-tool",
+]
+resolver = "2"
+
+[workspace.dependencies]
+anyhow = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+libc = "0.2"
+nix = { version = "0.29", default-features = false, features = ["sched", "mount", "net", "user", "fs", "hostname", "signal", "process"] }

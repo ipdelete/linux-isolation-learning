@@ -1,0 +1,19 @@
+# Rust
+/target/
+
+# OS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# Temp files
+*.swp
+*.swo
+*~
+*.tmp
+
+# Env
+.env
+.env.*
