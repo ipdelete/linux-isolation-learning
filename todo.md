@@ -1,7 +1,7 @@
 # Rewrite TODO (Rust-first)
 
 ## Getting Started
-- [ ] docs/00-getting-started.md (prerequisites: Linux kernel version, sudo access, required packages, editor setup)
+- [x] docs/00-getting-started.md (prerequisites: Linux kernel version, sudo access, required packages, editor setup)
 
 ## docs/00-foundations
 - [x] docs/00-foundations/00-lesson-template.md
