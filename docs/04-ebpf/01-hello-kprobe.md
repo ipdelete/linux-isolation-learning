@@ -394,23 +394,19 @@ Command::Kprobe { function, duration } => {
     };
 
     // Use tokio for async signal handling
-    tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap()
-        .block_on(async {
-            let ctrl_c = signal::ctrl_c();
-            let sleep = tokio::time::sleep(duration_secs);
+    // Note: We're already in an async context from #[tokio::main],
+    // so we can use async/await directly without creating a nested runtime
+    let ctrl_c = signal::ctrl_c();
+    let sleep = tokio::time::sleep(duration_secs);
 
-            tokio::select! {
-                _ = ctrl_c => {
-                    println!("\nReceived Ctrl+C, detaching kprobe...");
-                }
-                _ = sleep => {
-                    println!("\nDuration elapsed, detaching kprobe...");
-                }
-            }
-        });
+    tokio::select! {
+        _ = ctrl_c => {
+            println!("\nReceived Ctrl+C, detaching kprobe...");
+        }
+        _ = sleep => {
+            println!("\nDuration elapsed, detaching kprobe...");
+        }
+    }
 
     // Program is automatically detached when `bpf` is dropped
     println!("Kprobe detached. Exiting.");

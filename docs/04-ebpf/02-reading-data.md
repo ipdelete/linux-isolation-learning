@@ -140,10 +140,8 @@ fn test_kprobe_reads_function_arguments() {
     cmd.args(["kprobe", "do_sys_openat2", "-d", "2"])
         .assert()
         .success()
-        // Look for syscall number or argument data in output
-        .stdout(predicate::str::contains("syscall")
-            .or(predicate::str::contains("arg"))
-            .or(predicate::str::contains("nr")));
+        // Look for the dfd (directory file descriptor) argument in output
+        .stdout(predicate::str::contains("dfd="));
 }
 ```
 
@@ -151,7 +149,8 @@ fn test_kprobe_reads_function_arguments() {
 
 ```bash
 # Run only the Lesson 02 tests
-sudo -E cargo test -p ebpf-tool test_kprobe_reads -- --ignored
+# Note: We removed #[ignore] from these tests, so we run them normally
+sudo -E cargo test -p ebpf-tool test_kprobe_reads
 
 # You should see failures like:
 # thread 'test_kprobe_reads_process_info' panicked at 'not yet implemented'
@@ -250,10 +249,16 @@ fn try_syscall_kprobe(ctx: ProbeContext) -> Result<u32, i64> {
 
 #### Step 5: Implement try_read_syscall_args (Line 363)
 
+**Note on syscall_nr field**: In this lesson, we're using the `syscall_nr` field
+to store a function argument value to demonstrate how to read kprobe arguments.
+When probing `do_sys_openat2`, arg(0) is the directory file descriptor (dfd),
+not the syscall number. A real tracing tool would use a separate field for arguments.
+
 ```rust
 unsafe fn try_read_syscall_args(ctx: &ProbeContext) -> Result<u64, i64> {
     // Read the first argument of the probed function
-    // For do_sys_openat2, arg(0) is the directory file descriptor
+    // For do_sys_openat2, arg(0) is the directory file descriptor (dfd)
+    // Common values: -100 (AT_FDCWD), or small positive integers for real fds
     let arg0: u64 = ctx.arg(0).ok_or(-1i64)?;
     Ok(arg0)
 }
@@ -339,7 +344,7 @@ Command::Kprobe { function, duration } => {
                         .trim_end_matches('\0');
 
                     println!(
-                        "[{}] {}: syscall_nr={}, timestamp={}",
+                        "[{}] {}: dfd={}, timestamp={}",
                         event.pid, comm, event.syscall_nr, event.timestamp_ns
                     );
                 }
@@ -402,10 +407,15 @@ Expected output:
 [INFO] Attaching kprobe to function: do_sys_openat2
 [INFO] Duration: 5 seconds (0 = until Ctrl+C)
 [INFO] Kprobe attached to do_sys_openat2. Listening for events...
-[12345] bash: syscall_nr=257, timestamp=1234567890123
-[12346] cat: syscall_nr=257, timestamp=1234567890456
-[12347] ls: syscall_nr=257, timestamp=1234567890789
+[12345] bash: dfd=18446744073709551516, timestamp=1234567890123
+[12346] cat: dfd=18446744073709551516, timestamp=1234567890456
+[12347] ls: dfd=3, timestamp=1234567890789
 [INFO] Detaching kprobe...
+
+**Note**: The `dfd` value is the directory file descriptor argument from do_sys_openat2:
+- `18446744073709551516` is -100 (AT_FDCWD) as u64, meaning "current working directory"
+- Small positive values like `3` are actual file descriptors for open directories
+- We're storing this in the `syscall_nr` field to demonstrate reading function arguments
 ```
 
 In a separate terminal, generate some file activity:

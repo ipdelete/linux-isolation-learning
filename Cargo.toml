@@ -13,6 +13,7 @@ resolver = "2"
 anyhow = "1.0"
 aya = "0.13"
 aya-log = "0.2"
+bytes = "1.0"
 clap = { version = "4.5", features = ["derive"] }
 env_logger = "0.11"
 libc = "0.2"
