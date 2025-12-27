@@ -382,6 +382,7 @@ Command::Stats => {
     println!("Loading eBPF program...");
 
     // Load the eBPF bytecode
+    // The build.rs script places the compiled eBPF program in OUT_DIR
     let ebpf_bytes = include_bytes_aligned!(
         concat!(env!("OUT_DIR"), "/ebpf-tool-ebpf")
     );
@@ -510,11 +511,8 @@ fn syscall_name(nr: u64) -> &'static str {
 Before building the userspace tool, you need to compile the eBPF program:
 
 ```bash
-# Build eBPF programs (requires bpf-linker)
-cargo xtask build-ebpf
-
-# Or if you don't have xtask set up:
-cargo build -p ebpf-tool-ebpf --target bpfel-unknown-none -Z build-std=core
+# Build eBPF programs (via build.rs which requires bpf-linker)
+cargo build -p ebpf-tool
 ```
 
 ### Step 5: Build and Test

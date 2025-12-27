@@ -294,9 +294,9 @@ Command::Kprobe { function, duration } => {
     log::info!("Duration: {} seconds (0 = until Ctrl+C)", duration);
 
     // Load the eBPF program bytecode
-    // Note: Adjust path based on your build output location
+    // The build.rs script places the compiled eBPF program in OUT_DIR
     let ebpf_bytes = include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/release/ebpf-tool-ebpf"
+        concat!(env!("OUT_DIR"), "/ebpf-tool-ebpf")
     );
 
     let mut bpf = Ebpf::load(ebpf_bytes)?;
@@ -362,10 +362,7 @@ Command::Kprobe { function, duration } => {
 ### Step 3: Build Everything
 
 ```bash
-# Build the eBPF program first
-cargo xtask build-ebpf --release
-
-# Build the userspace tool
+# Build the userspace tool (build.rs automatically compiles eBPF programs)
 cargo build -p ebpf-tool --release
 ```
 

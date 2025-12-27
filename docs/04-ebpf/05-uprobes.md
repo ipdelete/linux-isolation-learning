@@ -326,15 +326,10 @@ use aya_ebpf::helpers::bpf_get_current_pid_tgid;
 
 **Build the eBPF program**:
 
-```bash
-cd crates/ebpf-tool-ebpf
-cargo build --release --target bpfel-unknown-none -Z build-std=core
-```
-
-Or using xtask if available:
+The build.rs script automatically compiles the eBPF program when you build the userspace tool:
 
 ```bash
-cargo xtask build-ebpf --release
+cargo build -p ebpf-tool
 ```
 
 ### Step 2: Implement the Userspace Loader
@@ -365,14 +360,9 @@ Command::Uprobe {
     println!("Duration: {} seconds (0 = until Ctrl+C)", duration);
 
     // Load the eBPF bytecode
-    // The path depends on your build setup - adjust as needed
-    #[cfg(debug_assertions)]
+    // The build.rs script places the compiled eBPF program in OUT_DIR
     let bytes = include_bytes_aligned!(
-        "../../../target/bpfel-unknown-none/debug/uprobe"
-    );
-    #[cfg(not(debug_assertions))]
-    let bytes = include_bytes_aligned!(
-        "../../../target/bpfel-unknown-none/release/uprobe"
+        concat!(env!("OUT_DIR"), "/ebpf-tool-ebpf")
     );
 
     let mut bpf = aya::Bpf::load(bytes)?;
@@ -451,16 +441,8 @@ nix = { version = "0.29", features = ["user"] }
 First, build the eBPF program:
 
 ```bash
-# Build eBPF bytecode
+# Build the userspace tool (build.rs automatically compiles eBPF programs)
 cd /workspaces/linux-isolation-learning
-cargo xtask build-ebpf --release
-# Or manually:
-# cd crates/ebpf-tool-ebpf && cargo build --release --target bpfel-unknown-none -Z build-std=core
-```
-
-Then build the userspace tool:
-
-```bash
 cargo build -p ebpf-tool
 ```
 

@@ -392,9 +392,9 @@ Command::Tracepoint {
     log::info!("Duration: {} seconds (0 = until Ctrl+C)", duration);
 
     // Load the eBPF bytecode
-    // The include_bytes_aligned! macro ensures proper 8-byte alignment
+    // The build.rs script places the compiled eBPF program in OUT_DIR
     let ebpf_bytes = include_bytes_aligned!(
-        "../../ebpf-tool-ebpf/target/bpfel-unknown-none/release/tracepoint"
+        concat!(env!("OUT_DIR"), "/ebpf-tool-ebpf")
     );
 
     let mut bpf = Ebpf::load(ebpf_bytes)
@@ -454,14 +454,9 @@ Command::Tracepoint {
 Before running tests, you must compile the eBPF program:
 
 ```bash
-# Navigate to the eBPF crate
-cd /workspaces/linux-isolation-learning/crates/ebpf-tool-ebpf
-
-# Build for the BPF target
-cargo build --target bpfel-unknown-none --release
-
-# Or use cargo-xtask if available
-cargo xtask build-ebpf --release
+# Build the userspace tool (build.rs automatically compiles eBPF programs)
+cd /workspaces/linux-isolation-learning
+cargo build -p ebpf-tool
 ```
 
 ### Part 4: Run the Tests (Expect Success)

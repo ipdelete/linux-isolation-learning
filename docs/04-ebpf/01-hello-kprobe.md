@@ -314,17 +314,19 @@ fn try_hello_kprobe(ctx: ProbeContext) -> Result<u32, i64> {
 
 ### Step 2: Build the eBPF Program
 
-The eBPF program must be compiled to BPF bytecode before the userspace CLI can use it:
+The eBPF program must be compiled to BPF bytecode before the userspace CLI can use it.
+
+The project's `build.rs` script automatically compiles the eBPF programs when you build the userspace tool:
 
 ```bash
-# Build the eBPF programs (uses cargo-xtask)
-cargo xtask build-ebpf
-
-# Or if cargo-xtask is not set up, build manually:
-# cargo build --package ebpf-tool-ebpf --target bpfel-unknown-none -Z build-std=core
+# Build the userspace tool (automatically compiles eBPF via build.rs)
+cargo build -p ebpf-tool
 ```
 
-This produces a `.o` file containing BPF bytecode that will be embedded in the userspace binary.
+This invokes the build script which:
+1. Compiles `ebpf-tool-ebpf` to BPF bytecode
+2. Places the compiled program in `OUT_DIR`
+3. Makes it available for embedding via `include_bytes_aligned!`
 
 ### Step 3: Implement the Userspace CLI
 
@@ -345,9 +347,9 @@ Command::Kprobe { function, duration } => {
 
     // Step 1: Load the eBPF bytecode
     // The include_bytes_aligned! macro embeds the compiled eBPF object file
-    // and ensures proper 8-byte alignment required by the BPF loader
+    // The build.rs script places the compiled eBPF program in OUT_DIR
     let ebpf_bytes = include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/debug/ebpf-tool-ebpf"
+        concat!(env!("OUT_DIR"), "/ebpf-tool-ebpf")
     );
 
     let mut bpf = Ebpf::load(ebpf_bytes)
@@ -436,8 +438,8 @@ nix = { version = "0.27", features = ["user"] }
 ### Step 5: Run Tests (Expect Success)
 
 ```bash
-# Build eBPF first
-cargo xtask build-ebpf
+# Build eBPF and userspace (build.rs automatically compiles eBPF programs)
+cargo build -p ebpf-tool
 
 # Run tests with root
 sudo -E cargo test -p ebpf-tool --test kprobe_test
@@ -528,14 +530,14 @@ sudo cat /proc/kallsyms | grep -E "^[0-9a-f]+ [tT] (do_sys|vfs_|tcp_)"
 ### 1. `Failed to load eBPF program: ... BPF_PROG_LOAD failed`
 
 **Cause**: The eBPF program failed kernel verification. Common reasons:
-- The eBPF bytecode was not compiled (run `cargo xtask build-ebpf`)
+- The eBPF bytecode was not compiled
 - Kernel is too old (requires 5.8+ for full BTF support)
 - Missing BTF data
 
 **Fix**:
 ```bash
-# Rebuild eBPF programs
-cargo xtask build-ebpf
+# Rebuild eBPF programs (via build.rs)
+cargo build -p ebpf-tool
 
 # Check kernel version
 uname -r  # Should be 5.8+

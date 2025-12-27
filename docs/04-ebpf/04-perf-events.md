@@ -306,10 +306,9 @@ Command::Perf {
     log::info!("Duration: {} seconds (0 = until Ctrl+C)", duration);
 
     // Load the eBPF program
-    // Note: For this lesson, we attach a kprobe that uses PerfEventArray
-    // In a real implementation, you would load a specific perf program
+    // The build.rs script places the compiled eBPF program in OUT_DIR
     let elf_bytes = include_bytes_aligned!(
-        "../../ebpf-tool-ebpf/target/bpfel-unknown-none/release/ebpf-tool-ebpf"
+        concat!(env!("OUT_DIR"), "/ebpf-tool-ebpf")
     );
 
     let mut bpf = aya::Ebpf::load(elf_bytes)
@@ -472,12 +471,7 @@ log = "0.4"
 ### Step 5: Build and verify
 
 ```bash
-# Build the eBPF program first
-cd crates/ebpf-tool-ebpf
-cargo xtask build-ebpf --release
-
-# Build the userspace tool
-cd ../..
+# Build the userspace tool (build.rs automatically compiles eBPF programs)
 cargo build -p ebpf-tool
 
 # Run the tests
