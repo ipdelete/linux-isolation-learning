@@ -12,9 +12,9 @@
 - [x] crates/ebpf-tool-common/src/lib.rs (event structs, no_std)
 
 ### crates/ebpf-tool (userspace CLI with todo!() stubs)
-- [ ] crates/ebpf-tool/Cargo.toml
-- [ ] crates/ebpf-tool/build.rs
-- [ ] crates/ebpf-tool/src/main.rs (Command enum with todo!() for each subcommand)
+- [x] crates/ebpf-tool/Cargo.toml
+- [x] crates/ebpf-tool/build.rs
+- [x] crates/ebpf-tool/src/main.rs (Command enum with todo!() for each subcommand)
 
 ### crates/ebpf-tool tests (test files with todo!() stubs)
 - [ ] crates/ebpf-tool/tests/check_test.rs (lesson 00)

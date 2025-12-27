@@ -62,7 +62,9 @@ fn test_proc_command_fails_on_non_linux() {
     cmd.arg("proc")
         .assert()
         .failure()
-        .stderr(predicate::str::contains("failed to read namespace directory"));
+        .stderr(predicate::str::contains(
+            "failed to read namespace directory",
+        ));
 }
 
 // Unit tests for error module are in src/error.rs

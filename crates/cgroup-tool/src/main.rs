@@ -11,12 +11,28 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    Create { path: String },
-    Delete { path: String },
-    Attach { path: String, pid: u32 },
-    MemoryMax { path: String, bytes: u64 },
-    CpuMax { path: String, quota: String },
-    PidsMax { path: String, max: u64 },
+    Create {
+        path: String,
+    },
+    Delete {
+        path: String,
+    },
+    Attach {
+        path: String,
+        pid: u32,
+    },
+    MemoryMax {
+        path: String,
+        bytes: u64,
+    },
+    CpuMax {
+        path: String,
+        quota: String,
+    },
+    PidsMax {
+        path: String,
+        max: u64,
+    },
     /// Set I/O bandwidth/IOPS limits for a device
     IoMax {
         path: String,
@@ -153,7 +169,11 @@ fn main() -> Result<()> {
         // - Example: "8:0 rbps=1048576 wbps=1048576"
         // - Can use "max" for unlimited
         // - Verify io controller is enabled in subtree_control
-        Command::IoMax { path, device, limit } => {
+        Command::IoMax {
+            path,
+            device,
+            limit,
+        } => {
             todo!("Implement I/O limit - write tests first! (path: {path}, device: {device}, limit: {limit})")
         }
     }

@@ -2,12 +2,24 @@
 name = "ebpf-tool"
 version = "0.1.0"
 edition = "2021"
-description = "CLI tool for eBPF tracing tutorials"
-license = "MIT"
-
-[[bin]]
-name = "ebpf-tool"
-path = "src/main.rs"
 
 [dependencies]
-# TODO: Add dependencies as lessons progress
+anyhow = { workspace = true }
+aya = { workspace = true }
+aya-log = { workspace = true }
+clap = { workspace = true }
+env_logger = { workspace = true }
+libc = { workspace = true }
+log = { workspace = true }
+nix = { workspace = true }
+tokio = { workspace = true }
+
+# Local dependency for shared types between userspace and eBPF
+ebpf-tool-common = { path = "../ebpf-tool-common" }
+
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "3.0"
+
+[build-dependencies]
+# Build script compiles eBPF programs from ebpf-tool-ebpf

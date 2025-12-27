@@ -77,7 +77,11 @@ pub struct SyscallKey {
 
 impl SyscallKey {
     pub const fn new(pid: u32, syscall_nr: u64) -> Self {
-        Self { pid, _pad: 0, syscall_nr }
+        Self {
+            pid,
+            _pad: 0,
+            syscall_nr,
+        }
     }
 }
 
