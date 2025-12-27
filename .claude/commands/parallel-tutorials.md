@@ -1,3 +1,9 @@
+---
+description: Create tutorials for a docs section in parallel
+argument-hint: [section-path]
+allowed-tools: Read, Write, Edit, Task
+---
+
 Read @todo.md and identify all incomplete lessons in the section specified by the user (e.g., "docs/01-namespaces" or "docs/02-cgroups").
 
 For each incomplete lesson in that section:
