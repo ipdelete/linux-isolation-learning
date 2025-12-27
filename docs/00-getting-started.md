@@ -22,6 +22,30 @@ Linux namespace and cgroup operations require elevated privileges because they f
 
 Most lessons require `sudo` or root access. For safety, **always use a VM or disposable environment** - never run these exercises on a production system or your primary workstation.
 
+## Running on macOS or Windows?
+
+**If you're on macOS or Windows**, you'll need a Linux environment. The easiest option is to use the included **DevContainer** configuration with VS Code:
+
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+2. Install [VS Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+3. Open this project in VS Code
+4. When prompted, click "Reopen in Container" (or press F1 → "Dev Containers: Reopen in Container")
+5. Wait for the container to build (first time takes 2-5 minutes)
+6. **Run the validation script**:
+   ```bash
+   bash scripts/validate-devcontainer.sh
+   ```
+
+The devcontainer is pre-configured with:
+- Debian Trixie with Linux kernel 5.15+
+- All required packages (iproute2, iptables, busybox, etc.)
+- Rust toolchain
+- Privileged mode and necessary capabilities for namespaces/cgroups
+
+If all validation checks pass, skip to the "Install Rust" section below.
+
+For detailed validation steps and troubleshooting, see `devcontainer-validation.md`.
+
 ## Prerequisites
 
 ### 1. Linux System Requirements
