@@ -10,6 +10,10 @@ Four Rust CLI tools that demonstrate container building blocks:
 - **cgroup-tool** - cgroup v2 resource limits
 - **oci-tool** - OCI bundle helpers
 
+## Getting Started
+
+Start with [00-setup-rust.md](docs/00-foundations/00-setup-rust.md) and follow the numbered lessons in order.
+
 ## Table of Contents
 
 ### 00 - Foundations
@@ -53,10 +57,6 @@ Four Rust CLI tools that demonstrate container building blocks:
 ### 90 - Appendix
 - [01-rust-syscall-cheatsheet.md](docs/90-appendix/01-rust-syscall-cheatsheet.md)
 - [02-troubleshooting.md](docs/90-appendix/02-troubleshooting.md)
-
-## Getting Started
-
-Start with [00-setup-rust.md](docs/00-foundations/00-setup-rust.md) and follow the numbered lessons in order.
 
 ## Safety Note
 
