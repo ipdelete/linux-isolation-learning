@@ -1,35 +1,98 @@
 # Lesson Title
 
 ## Goal
-- State the one thing you will learn and build.
+State the single concept you'll learn and the one deliverable you'll build (e.g., "Create a PID namespace and observe process isolation").
 
 ## Prereqs
-- List only what is required for this lesson.
+- List only what's required for this specific lesson (e.g., "Completed `00-setup-rust.md`", "`sudo` access")
+- Mention specific prior lessons if they introduced required concepts
 
 ## Write Tests (Red)
-- Point to the test file location (e.g., `crates/ns-tool/tests/pid_test.rs`).
-- List what the test should verify (success cases, error cases).
-- Show expected test structure or provide test skeleton with TODOs.
-- Run `cargo test -p <crate>` - expect failures (red).
+**Test file**: `crates/<crate>/tests/<feature>_test.rs`
+
+What the tests should verify:
+- Success case: [describe expected behavior]
+- Error case: [describe expected failure modes if applicable]
+
+Steps:
+1. Open the test file at the path above
+2. Find the TODO(s) in the test function(s)
+3. Implement the test using `assert_cmd` patterns:
+   ```rust
+   use assert_cmd::Command;
+
+   let mut cmd = Command::cargo_bin("<crate>").unwrap();
+   cmd.arg("<subcommand>")
+      .assert()
+      .success()
+      .stdout(predicates::str::contains("expected output"));
+   ```
+4. Run the test (expect failure):
+   ```bash
+   cargo test -p <crate> --test <feature>_test
+   ```
+
+Expected output: Tests panic with `todo!()` or fail because implementation is missing (RED phase).
 
 ## Build (Green)
-- Point to the implementation file(s) and TODO locations.
-- Small, numbered steps for implementing the functionality.
-- Add the exact command or code change needed.
-- Run `cargo test -p <crate>` - expect passes (green).
+**Implementation file**: `crates/<crate>/src/main.rs` (or other file)
+**TODO location**: Line ~XX in the `Command::<Variant>` match arm
+
+Steps:
+1. Open `crates/<crate>/src/main.rs`
+2. Find the `Command::<Variant> => todo!(...)` match arm
+3. Replace `todo!()` with implementation:
+   - Step 1: [specific code or syscall to add]
+   - Step 2: [next specific action]
+   - Step 3: [final action - usually printing output]
+4. Run tests (expect success):
+   ```bash
+   cargo test -p <crate> --test <feature>_test
+   ```
+
+Expected output: All tests pass (GREEN phase).
 
 ## Verify
-- Automated: `cargo test -p <crate>` should pass.
-- Manual: One or two commands that let you observe the behavior (e.g., check `/proc`, `ip addr`, cgroup files).
+**Automated verification**:
+```bash
+cargo test -p <crate>  # All tests pass
+```
 
-## Clean Up (optional)
-- How to remove temp files or undo system changes.
+**Manual verification** (observe the actual behavior):
+```bash
+# Command to run
+sudo cargo run -p <crate> -- <subcommand>
+
+# What you should see
+[Describe expected output or system state]
+
+# How to inspect the result
+[Commands to check /proc, ip addr, cgroup files, etc.]
+```
+
+## Clean Up (if applicable)
+```bash
+# Commands to remove created resources
+[Specific cleanup commands for namespaces/cgroups/files/etc.]
+```
 
 ## Common Errors
-- Top 2-4 mistakes you might make and how to fix them.
+1. **Error message or symptom**
+   - Cause: [Why this happens]
+   - Fix: [How to resolve it]
+
+2. **Error message or symptom**
+   - Cause: [Why this happens]
+   - Fix: [How to resolve it]
+
+3. **Error message or symptom** (if applicable)
+   - Cause: [Why this happens]
+   - Fix: [How to resolve it]
 
 ## Notes
-- Short clarifications or gotchas.
+- Short clarifications or gotchas specific to this lesson
+- Links to man pages or relevant documentation
+- Differences between kernel versions if applicable
 
 ## Next
-- Point to the next lesson in the sequence.
+`XX-next-lesson.md` - [Brief description of what's next]
