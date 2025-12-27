@@ -17,7 +17,8 @@
 		"ghcr.io/devcontainers/features/common-utils:2": {},
 		"ghcr.io/devcontainers/features/git:1": {},
 		"ghcr.io/devcontainers/features/github-cli:1": {},
-		"ghcr.io/devcontainers-extra/features/claude-code:1": {}
+		"ghcr.io/devcontainers-extra/features/claude-code:1": {},
+		"ghcr.io/jsburckhardt/devcontainer-features/codex:1": {}
 	},
 	"customizations": {
 		"vscode": {
