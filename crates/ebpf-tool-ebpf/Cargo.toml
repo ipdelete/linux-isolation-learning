@@ -1,0 +1,60 @@
+# eBPF Program Crate for ebpf-tool
+#
+# IMPORTANT: This crate is NOT a workspace member!
+# It compiles to a different target (bpfel-unknown-none) and runs inside
+# the Linux kernel, not in userspace. The aya-build crate handles
+# compiling this separately during the userspace build.
+#
+# The BPF target has significant constraints:
+# - no_std environment (no standard library)
+# - Limited stack size (512 bytes)
+# - Must pass the BPF verifier's safety checks
+# - No dynamic memory allocation
+# - No floating point operations
+
+[package]
+name = "ebpf-tool-ebpf"
+version = "0.1.0"
+edition = "2021"
+description = "eBPF (kernel-side) programs for ebpf-tool - runs inside the Linux kernel"
+
+[dependencies]
+# Core eBPF functionality: program types, maps, helper functions
+# Provides #[map], #[tracepoint], #[kprobe], etc. macros
+aya-ebpf = "0.1"
+
+# Logging support for eBPF programs
+# Messages are read from userspace via a perf buffer
+aya-log-ebpf = "0.1"
+
+# Shared type definitions between eBPF (kernel) and userspace
+# Must be no_std compatible since eBPF programs can't use std
+ebpf-tool-common = { path = "../ebpf-tool-common" }
+
+[package.metadata.aya]
+# Tells aya-build this is an eBPF crate
+# Programs are auto-discovered from src/*.rs files with #[program] attributes
+programs = []
+
+# Profile settings for BPF compilation
+#
+# BPF programs have strict requirements that differ from normal Rust:
+# 1. The BPF verifier has complexity limits - unoptimized code often fails
+# 2. Debug info can cause issues with the verifier
+# 3. Stack size is limited to 512 bytes - must optimize aggressively
+# 4. Panics cannot unwind in BPF - must abort immediately
+# 5. LTO helps reduce code size and enables cross-function optimization
+
+[profile.dev]
+opt-level = 3           # Always optimize - BPF verifier rejects unoptimized code
+debug = false           # Debug info causes verifier issues and bloats programs
+overflow-checks = false # Not supported in BPF, would cause verifier rejection
+panic = "abort"         # No unwinding in BPF - kernel doesn't support it
+lto = true              # Link-time optimization helps meet verifier limits
+
+[profile.release]
+opt-level = 3           # Maximum optimization for smallest, fastest BPF code
+debug = false           # No debug info in release builds
+overflow-checks = false # Overflow checks not available in BPF environment
+panic = "abort"         # Must abort on panic - no unwinding support
+lto = true              # Essential for production BPF programs

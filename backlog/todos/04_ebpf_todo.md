@@ -26,12 +26,12 @@
 - [x] crates/ebpf-tool/tests/tracer_test.rs (lesson 08)
 
 ### crates/ebpf-tool-ebpf (eBPF programs with todo!() stubs)
-- [ ] crates/ebpf-tool-ebpf/Cargo.toml
-- [ ] crates/ebpf-tool-ebpf/src/main.rs
-- [ ] crates/ebpf-tool-ebpf/src/kprobe.rs
-- [ ] crates/ebpf-tool-ebpf/src/uprobe.rs
-- [ ] crates/ebpf-tool-ebpf/src/tracepoint.rs
-- [ ] crates/ebpf-tool-ebpf/src/perf.rs
+- [x] crates/ebpf-tool-ebpf/Cargo.toml
+- [x] crates/ebpf-tool-ebpf/src/main.rs
+- [x] crates/ebpf-tool-ebpf/src/kprobe.rs
+- [x] crates/ebpf-tool-ebpf/src/uprobe.rs
+- [x] crates/ebpf-tool-ebpf/src/tracepoint.rs
+- [x] crates/ebpf-tool-ebpf/src/perf.rs
 
 ## Phase 3: Lesson Docs (guide learners through TDD)
 
