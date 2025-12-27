@@ -15,10 +15,10 @@ fail=0
 check() {
     if eval "$2" &>/dev/null; then
         echo -e "${GREEN}✓${NC} $1"
-        ((pass++))
+        ((pass++)) || true
     else
         echo -e "${RED}✗${NC} $1"
-        ((fail++))
+        ((fail++)) || true
     fi
 }
 
@@ -74,7 +74,7 @@ check "Network namespace" "$SUDO unshare --net /bin/true"
 check "User namespace" "unshare --user /bin/true"
 
 section "Cgroup v2"
-check "Cgroup v2 mounted" "mount | grep -q 'cgroup2 on /sys/fs/cgroup'"
+check "Cgroup v2 mounted" "mount | grep -q 'cgroup.*type cgroup2'"
 check "Cgroup controllers" "test -f /sys/fs/cgroup/cgroup.controllers"
 check "Can create cgroups" "$SUDO mkdir -p /sys/fs/cgroup/test-validation && $SUDO rmdir /sys/fs/cgroup/test-validation"
 
