@@ -17,6 +17,14 @@ enum Command {
     MemoryMax { path: String, bytes: u64 },
     CpuMax { path: String, quota: String },
     PidsMax { path: String, max: u64 },
+    /// Set I/O bandwidth/IOPS limits for a device
+    IoMax {
+        path: String,
+        /// Device major:minor (e.g., "8:0" for /dev/sda)
+        device: String,
+        /// I/O limit specification (e.g., "rbps=1048576 wbps=1048576")
+        limit: String,
+    },
 }
 
 fn main() -> Result<()> {
@@ -128,6 +136,25 @@ fn main() -> Result<()> {
         // - Verify by reading pids.max after write
         Command::PidsMax { path, max } => {
             todo!("Implement PIDs limit - write tests first! (path: {path}, max: {max})")
+        }
+
+        // TODO: Implement I/O limit setting
+        // Lesson: docs/02-cgroups/04-io.md
+        // Tests: tests/io_test.rs
+        //
+        // TDD Steps:
+        // 1. Write tests in tests/io_test.rs (RED)
+        // 2. Implement this function (GREEN)
+        // 3. Refactor as needed
+        //
+        // Implementation hints:
+        // - Write to /sys/fs/cgroup/{path}/io.max
+        // - Format: "MAJ:MIN rbps=X wbps=X riops=X wiops=X"
+        // - Example: "8:0 rbps=1048576 wbps=1048576"
+        // - Can use "max" for unlimited
+        // - Verify io controller is enabled in subtree_control
+        Command::IoMax { path, device, limit } => {
+            todo!("Implement I/O limit - write tests first! (path: {path}, device: {device}, limit: {limit})")
         }
     }
 

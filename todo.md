@@ -26,12 +26,12 @@
 - [x] docs/01-namespaces/10-join-existing.md
 
 ## docs/02-cgroups
-- [ ] docs/02-cgroups/01-cgv2-basics.md
-- [ ] docs/02-cgroups/02-memory.md
-- [ ] docs/02-cgroups/03-cpu.md
-- [ ] docs/02-cgroups/04-io.md
-- [ ] docs/02-cgroups/05-pids.md
-- [ ] docs/02-cgroups/06-multi-resource.md
+- [x] docs/02-cgroups/01-cgv2-basics.md
+- [x] docs/02-cgroups/02-memory.md
+- [x] docs/02-cgroups/03-cpu.md
+- [x] docs/02-cgroups/04-io.md
+- [x] docs/02-cgroups/05-pids.md
+- [x] docs/02-cgroups/06-multi-resource.md
 
 ## docs/03-runc
 - [ ] docs/03-runc/01-oci-bundle.md
