@@ -1,9 +1,9 @@
 # eBPF Tutorial TODO (Aya-based, tracing focus)
 
 ## Setup
-- [ ] Update Cargo.toml (workspace members + dependencies)
-- [ ] Update .devcontainer/devcontainer.json (llvm, bpf-linker, mounts)
-- [ ] Update README.md (add 04-ebpf section to TOC)
+- [x] Update Cargo.toml (workspace members + dependencies)
+- [x] Update .devcontainer/devcontainer.json (llvm, bpf-linker, mounts)
+- [x] Update README.md (add 04-ebpf section to TOC)
 
 ## crates/ebpf-tool-common
 - [ ] crates/ebpf-tool-common/Cargo.toml

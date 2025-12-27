@@ -65,6 +65,16 @@ if [ $(id -u) -ne 0 ]; then
     check "sudo" "command -v sudo"
 fi
 
+section "eBPF Toolchain"
+check "clang" "command -v clang"
+check "llvm-objcopy" "command -v llvm-objcopy"
+check "bpf-linker" "command -v bpf-linker"
+check "rust-src component" "rustup component list --installed | grep -q rust-src"
+
+section "eBPF Kernel Support"
+check "/sys/kernel/debug mounted" "test -d /sys/kernel/debug/tracing"
+check "/sys/kernel/btf/vmlinux exists" "test -f /sys/kernel/btf/vmlinux"
+
 section "Namespace Support"
 check "PID namespace" "$SUDO unshare --pid --fork /bin/true"
 check "UTS namespace" "$SUDO unshare --uts /bin/true"

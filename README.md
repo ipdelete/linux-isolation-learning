@@ -4,11 +4,12 @@ A hands-on Rust learning path for Linux container primitives: namespaces, cgroup
 
 ## What You Will Build
 
-Four Rust CLI tools that demonstrate container building blocks:
+Five Rust CLI tools that demonstrate container building blocks:
 - **ns-tool** - namespace creation and management
 - **netns-tool** - network namespace setup with veth pairs
 - **cgroup-tool** - cgroup v2 resource limits
 - **oci-tool** - OCI bundle helpers
+- **ebpf-tool** - eBPF tracing with kprobes, uprobes, and tracepoints
 
 ## Getting Started
 
@@ -53,6 +54,17 @@ Start with [00-setup-rust.md](docs/00-foundations/00-setup-rust.md) and follow t
 - [05-seccomp.md](docs/03-runc/05-seccomp.md)
 - [06-network-integration.md](docs/03-runc/06-network-integration.md)
 - [07-cgroups-integration.md](docs/03-runc/07-cgroups-integration.md)
+
+### 04 - eBPF
+- [00-ebpf-setup.md](docs/04-ebpf/00-ebpf-setup.md)
+- [01-hello-kprobe.md](docs/04-ebpf/01-hello-kprobe.md)
+- [02-reading-data.md](docs/04-ebpf/02-reading-data.md)
+- [03-maps.md](docs/04-ebpf/03-maps.md)
+- [04-perf-events.md](docs/04-ebpf/04-perf-events.md)
+- [05-uprobes.md](docs/04-ebpf/05-uprobes.md)
+- [06-tracepoints.md](docs/04-ebpf/06-tracepoints.md)
+- [07-perf-sampling.md](docs/04-ebpf/07-perf-sampling.md)
+- [08-combining.md](docs/04-ebpf/08-combining.md)
 
 ### 90 - Appendix
 - [01-rust-syscall-cheatsheet.md](docs/90-appendix/01-rust-syscall-cheatsheet.md)

@@ -29,7 +29,7 @@
 			]
 		}
 	},
-	"postCreateCommand": "apt-get update && apt-get install -y cgroup-tools strace util-linux iproute2 iptables iputils-ping busybox-static sudo",
+	"postCreateCommand": "apt-get update && apt-get install -y cgroup-tools strace util-linux iproute2 iptables iputils-ping busybox-static sudo llvm clang && rustup component add rust-src && cargo install bpf-linker",
 	"remoteUser": "root",
 	"runArgs": [
 		"--privileged",
@@ -37,5 +37,9 @@
 	],
 	"securityOpt": [
 		"seccomp=unconfined"
+	],
+	"mounts": [
+		"source=/sys/kernel/debug,target=/sys/kernel/debug,type=bind",
+		"source=/sys/kernel/btf,target=/sys/kernel/btf,type=bind,readonly"
 	]
 }
