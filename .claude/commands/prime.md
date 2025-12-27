@@ -1,0 +1,1 @@
+run git ls-files and read @plan.md

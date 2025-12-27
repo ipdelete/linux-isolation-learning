@@ -106,7 +106,9 @@ fn main() -> Result<()> {
         // - Add iptables MASQUERADE rule
         // - Add forward accept rules for the bridge
         Command::Nat { bridge, outbound } => {
-            todo!("Implement NAT setup - write tests first! (bridge: {bridge}, outbound: {outbound})")
+            todo!(
+                "Implement NAT setup - write tests first! (bridge: {bridge}, outbound: {outbound})"
+            )
         }
     }
 

@@ -9,8 +9,6 @@
 // This subcommand is already implemented as a reference example.
 // Study this test to understand the pattern before writing your own tests.
 
-use assert_cmd::Command;
-
 #[test]
 fn test_proc_lists_namespaces() {
     // TODO: Write a test that verifies `ns-tool proc` outputs namespace information
