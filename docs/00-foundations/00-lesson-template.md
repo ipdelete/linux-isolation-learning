@@ -4,8 +4,9 @@
 State the single concept you'll learn and the one deliverable you'll build (e.g., "Create a PID namespace and observe process isolation").
 
 ## Prereqs
-- List only what's required for this specific lesson (e.g., "Completed `00-setup-rust.md`", "`sudo` access")
+- List only what's required for this specific lesson (e.g., "Completed `00-setup-rust.md`", "Elevated privileges" or "Root access")
 - Mention specific prior lessons if they introduced required concepts
+- **Note for DevContainer users**: If a lesson says "`sudo` access required", you already have it (running as root). Just omit the `sudo` prefix when running commands.
 
 ## Write Tests (Red)
 **Test file**: `crates/<crate>/tests/<feature>_test.rs`
@@ -59,8 +60,15 @@ cargo test -p <crate>  # All tests pass
 ```
 
 **Manual verification** (observe the actual behavior):
+
+Note on `sudo` prefix:
+- **In DevContainer**: You're already root, just run: `cargo run -p <crate> -- <subcommand>`
+- **On native Linux**: Add `sudo` prefix: `sudo cargo run -p <crate> -- <subcommand>`
+
 ```bash
-# Command to run
+# Example command (omit sudo in DevContainer)
+cargo run -p <crate> -- <subcommand>
+# or with sudo on native Linux
 sudo cargo run -p <crate> -- <subcommand>
 
 # What you should see

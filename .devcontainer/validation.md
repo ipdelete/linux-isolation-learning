@@ -2,9 +2,29 @@
 
 This document provides step-by-step validation that your devcontainer is properly configured for the Linux isolation learning tutorials.
 
-## Important: Running as Root in DevContainer
+## Important: Root Access in DevContainer vs. Native Linux
 
-**The devcontainer is configured to run as root** (`"remoteUser": "root"` in `.devcontainer/devcontainer.json`). This is intentional for this learning environment because:
+**In the DevContainer**, you run as `root` (UID 0). **On native Linux**, you run as a regular user with `sudo` access. Here's how to adapt the lessons:
+
+### DevContainer (You are root)
+
+```bash
+# DevContainer commands do NOT need sudo
+cargo run -p ns-tool -- pid /bin/true
+
+# The devcontainer.json has "remoteUser": "root" which is intentional
+```
+
+### Native Linux (You are a regular user)
+
+```bash
+# Native Linux commands NEED sudo for privileged operations
+sudo cargo run -p ns-tool -- pid /bin/true
+
+# This is why the lessons show sudo prefixes
+```
+
+**In the DevContainer, the devcontainer is configured to run as root** (`"remoteUser": "root"` in `.devcontainer/devcontainer.json`). This is intentional for this learning environment because:
 
 - Almost every lesson requires privileged operations (namespaces, cgroups, network configuration)
 - Running as root eliminates the need to prefix every command with `sudo`

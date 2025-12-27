@@ -4,11 +4,23 @@
 // After the container starts, run: bash scripts/validate-devcontainer.sh
 // For detailed validation steps, see: .devcontainer/validation.md
 //
-// NOTE: This container runs as root ("remoteUser": "root") because:
+// ROOT ACCESS AND SUDO IN THIS DEVCONTAINER:
+//
+// This container runs as root ("remoteUser": "root") to match real-world privilege escalation.
+//
+// Key difference from native Linux:
+// - In DevContainer: You ARE root, so commands do NOT need "sudo"
+// - On native Linux: You are a regular user, so commands NEED "sudo"
+//
+// Why root in the container?
 // - Almost every lesson requires privileged operations (namespaces, cgroups, network config)
 // - Running as root eliminates the need to prefix every command with sudo
 // - The container is isolated from your host, so running as root inside is safe for learning
 // - This is a teaching environment, not production (where you wouldn't run as root)
+//
+// The lessons show "sudo" because they're written for native Linux users.
+// In the DevContainer, simply omit the "sudo" prefix when you see it in lessons.
+// See .devcontainer/validation.md for examples.
 {
 	"name": "Rust",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile

@@ -355,7 +355,7 @@ Command::Kprobe { function, duration } => {
 
     // Step 2: Initialize aya_log to receive log messages from eBPF
     // This sets up a perf buffer to receive info!/warn!/error! messages
-    if let Err(e) = aya_log::EbpfLogger::init(&mut bpf) {
+    if let Err(e) = aya_log::BpfLogger::init(&mut bpf) {
         // Non-fatal: logging might not be available on all systems
         log::warn!("Failed to initialize eBPF logger: {}", e);
     }
@@ -644,7 +644,7 @@ sudo cat /proc/kallsyms | grep -E "^[0-9a-f]+ [tT] .*sys_"
 
 **Understanding aya_log**:
 - Messages from `info!(&ctx, "...")` are sent via a perf buffer
-- Userspace must poll this buffer (handled by `EbpfLogger::init`)
+- Userspace must poll this buffer (handled by `BpfLogger::init`)
 - If the buffer fills up, messages are dropped
 - For high-volume tracing, consider using maps instead of logging
 

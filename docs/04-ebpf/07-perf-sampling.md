@@ -472,7 +472,7 @@ Command::Perf { frequency, duration } => {
         .context("Failed to load eBPF program")?;
 
     // Initialize aya-log for eBPF logging (optional)
-    if let Err(e) = aya_log::EbpfLogger::init(&mut bpf) {
+    if let Err(e) = aya_log::BpfLogger::init(&mut bpf) {
         log::warn!("Failed to init eBPF logger: {}", e);
     }
 

@@ -24,6 +24,7 @@ enum Command {
     Time,
     Setns,
     Proc,
+    CheckCaps,
 }
 
 fn main() -> Result<()> {
@@ -100,6 +101,21 @@ fn main() -> Result<()> {
         // This is already implemented as a reference example
         // Study this before implementing other subcommands
         Command::Proc => print_proc_ns()?,
+
+        // TODO: Implement check-caps subcommand (capability inspection)
+        // Lesson: docs/00-foundations/04-permissions-and-sudo.md
+        // Tests: tests/caps_test.rs
+        //
+        // TDD Steps:
+        // 1. First, write tests in tests/caps_test.rs (RED)
+        // 2. Then implement this function to make tests pass (GREEN)
+        // 3. Refactor as needed
+        //
+        // Implementation hints:
+        // - Read /proc/self/status to get CapEff (effective capabilities)
+        // - Parse the hex value to check for CAP_SYS_ADMIN (bit 21)
+        // - Report which namespaces can be created with current privileges
+        Command::CheckCaps => todo!("Implement check-caps - write tests first!"),
     }
 
     Ok(())

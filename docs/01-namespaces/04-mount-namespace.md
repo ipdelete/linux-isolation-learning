@@ -481,7 +481,7 @@ ls /mnt/isolated_test/
 # (No files - the tmpfs was unmounted when we exited)
 
 # Clean up the empty directory
-sudo rmount /mnt/isolated_test 2>/dev/null || true
+sudo umount /mnt/isolated_test 2>/dev/null || true
 sudo rm -rf /mnt/isolated_test
 ```
 

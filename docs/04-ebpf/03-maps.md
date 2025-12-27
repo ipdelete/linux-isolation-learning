@@ -56,7 +56,7 @@ eBPF HashMaps support these operations:
 +-------------------+------------------------------------------+
 ```
 
-**Important**: Map operations are atomic. Multiple CPUs can safely update the same map concurrently without explicit locking (the kernel handles synchronization).
+**Important**: Individual map operations like `insert` are atomic. However, compound operations (like "get then increment then insert") are not atomic and can lose updates under concurrent access. For safe atomic increments, use per-CPU maps or kernel-side atomic helpers where available.
 
 ### Sizing Maps
 
@@ -71,7 +71,7 @@ static SYSCALL_COUNTS: HashMap<u64, u64> = HashMap::with_max_entries(10240, 0);
 The `MAX_MAP_ENTRIES` constant (10240) is defined in `ebpf-tool-common`:
 - Large enough for typical workloads
 - Small enough to fit in kernel memory
-- Must be a power of 2 for optimal performance
+- No power-of-two requirement (though powers of 2 may have better hash distribution)
 
 ## Write Tests (Red)
 
@@ -307,6 +307,10 @@ fn try_count_syscalls(ctx: &ProbeContext) -> Result<u32, i64> {
     // On x86_64, this is in the orig_rax register for sys_enter
     let syscall_nr: u64 = unsafe { ctx.arg(0).ok_or(-1i64)? };
 
+    // WARNING: This pattern (get + insert) is NOT atomic and can lose updates
+    // under concurrent access from multiple CPUs. For high-frequency counters,
+    // consider using PerCpuHashMap instead (see example below).
+    //
     // Get current count (or 0 if not present)
     let count = unsafe {
         SYSCALL_COUNTS
@@ -326,6 +330,40 @@ fn try_count_syscalls(ctx: &ProbeContext) -> Result<u32, i64> {
     Ok(0)
 }
 ```
+
+### Per-CPU Maps for Safe Atomic Counters
+
+For accurate counters without data loss, use `PerCpuHashMap` instead of `HashMap`. Each CPU gets its own map instance, eliminating contention:
+
+```rust
+use aya_ebpf::maps::PerCpuHashMap;
+
+#[map]
+static SYSCALL_COUNTS: PerCpuHashMap<u64, u64> =
+    PerCpuHashMap::with_max_entries(MAX_MAP_ENTRIES, 0);
+
+fn try_count_syscalls(ctx: &ProbeContext) -> Result<u32, i64> {
+    let syscall_nr: u64 = unsafe { ctx.arg(0).ok_or(-1i64)? };
+
+    // This is now safe: each CPU has its own entry, no contention
+    let count = unsafe {
+        SYSCALL_COUNTS
+            .get(&syscall_nr)
+            .copied()
+            .unwrap_or(0)
+    };
+
+    unsafe {
+        SYSCALL_COUNTS
+            .insert(&syscall_nr, &(count + 1), 0)
+            .map_err(|_| -1i64)?;
+    }
+
+    Ok(0)
+}
+```
+
+When reading from userspace, `PerCpuHashMap::iter()` automatically aggregates values from all CPUs.
 
 ### Step 3: Implement the Userspace CLI
 

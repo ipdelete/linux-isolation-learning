@@ -1,14 +1,15 @@
 # 03 Procfs Intro: Reading Namespace Data from /proc
 
 ## Goal
-Learn to read and parse namespace information from the `/proc` filesystem using Rust. You will implement tests for the `proc` subcommand and understand how `/proc/[pid]/ns/` reveals which namespaces a process belongs to.
+Learn to read and parse namespace information from the `/proc` filesystem using Rust. You will write tests for the `proc` subcommand and understand how `/proc/[pid]/ns/` reveals which namespaces a process belongs to.
 
-**Deliverable**: Working tests that verify the `proc` subcommand correctly reads namespace symlinks and displays inode numbers.
+**Deliverable**: Working tests that verify the `proc` subcommand correctly reads namespace symlinks and displays inode numbers. This is the TDD "Red" phase - implementing tests while the code already works.
 
 **Time estimate**: ~30-40 minutes
 
 ## Prereqs
 - Completed `00-setup-rust.md` (Rust toolchain installed, workspace builds)
+- Completed `01-rust-syscall-basics.md` (understand syscall patterns)
 - Completed `02-cli-patterns.md` (understand subcommand structure)
 - Basic familiarity with Linux filesystems
 

@@ -4,8 +4,10 @@
 Install Rust and verify you can build and test the workspace. This lesson also introduces the Test-Driven Development (TDD) workflow you'll use throughout the course.
 
 ## Prereqs
-- Linux host or VM (Ubuntu 20.04+, Fedora 35+, or similar recommended)
-- Many later lessons require `sudo` access for namespace/cgroup operations
+- Linux host, VM, or DevContainer (Ubuntu 20.04+, Fedora 35+, Debian Trixie, or similar recommended)
+- Many later lessons require elevated privileges for namespace/cgroup operations
+  - **In DevContainer**: Commands run as root, so no `sudo` needed
+  - **On native Linux**: You'll need `sudo` or root access
 - Basic CLI tools: `git`, `curl`
 - This repository cloned locally
 
@@ -49,7 +51,7 @@ cargo build
 
 This will:
 - Download and compile all dependencies (~2-3 minutes on first run)
-- Build all four crates: `ns-tool`, `netns-tool`, `cgroup-tool`, `oci-tool`
+- Build all workspace crates: `ns-tool`, `netns-tool`, `cgroup-tool`, `oci-tool`, `ebpf-tool`, and `ebpf-tool-common`
 - Create binaries in `target/debug/`
 
 ## Verify

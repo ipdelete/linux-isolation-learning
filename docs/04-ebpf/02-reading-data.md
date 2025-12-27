@@ -302,7 +302,7 @@ Command::Kprobe { function, duration } => {
     let mut bpf = Ebpf::load(ebpf_bytes)?;
 
     // Initialize eBPF logging (for debug messages from eBPF program)
-    if let Err(e) = aya_log::EbpfLogger::init(&mut bpf) {
+    if let Err(e) = aya_log::BpfLogger::init(&mut bpf) {
         log::warn!("Failed to initialize eBPF logger: {}", e);
     }
 

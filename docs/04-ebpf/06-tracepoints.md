@@ -401,7 +401,7 @@ Command::Tracepoint {
         .context("Failed to load eBPF bytecode")?;
 
     // Initialize eBPF logging
-    if let Err(e) = aya_log::EbpfLogger::init(&mut bpf) {
+    if let Err(e) = aya_log::BpfLogger::init(&mut bpf) {
         log::warn!("Failed to initialize eBPF logger: {}", e);
     }
 
@@ -573,7 +573,7 @@ cat /sys/kernel/debug/tracing/events/sched/sched_switch/format
 
 5. **Events not appearing in output**
    - Cause: eBPF logging not initialized or events too infrequent
-   - Fix: Ensure `aya_log::EbpfLogger::init()` is called. Use verbose mode: `cargo run -p ebpf-tool -- -v tracepoint ...`
+   - Fix: Ensure `aya_log::BpfLogger::init()` is called. Use verbose mode: `cargo run -p ebpf-tool -- -v tracepoint ...`
    - Try a high-frequency tracepoint like `sched/sched_switch`
 
 6. **`Invalid argument` when reading tracepoint data**

@@ -330,8 +330,12 @@ fn exec_in_namespace(
 ) -> Result<()> {
     // Determine which namespaces to join (default: UTS, IPC, NET, MNT)
     // We skip PID by default because it requires special handling (fork)
-    let default_types = vec!["uts", "ipc", "net", "mnt"];
-    let types_to_join = ns_types.unwrap_or(&default_types.iter().map(|s| s.to_string()).collect());
+    let types_to_join: Vec<String> = ns_types
+        .map(|v| v.to_vec())
+        .unwrap_or_else(|| vec!["uts", "ipc", "net", "mnt"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect());
 
     let mut fds: Vec<(String, RawFd)> = Vec::new();
 
