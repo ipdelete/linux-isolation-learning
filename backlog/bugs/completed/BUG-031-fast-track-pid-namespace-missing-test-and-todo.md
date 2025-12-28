@@ -27,4 +27,8 @@ The lesson instructs learners to run a test and then implement `NsCommand::Pid`,
 Learners cannot follow the lesson as written because the referenced test file is missing and the code path is stubbed.
 
 ## Status
-OPEN
+CLOSED
+
+## Resolution
+Created `crates/contain/tests/ns_pid_test.rs` with `todo!()` stub following TDD pattern.
+The implementation stub in `src/ns.rs` already exists with `todo!()` - learners implement both.
