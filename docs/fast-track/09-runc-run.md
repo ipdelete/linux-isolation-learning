@@ -21,7 +21,7 @@ sudo install runc.amd64 /usr/local/bin/runc
 Create a working bundle with busybox:
 ```bash
 # Create bundle
-cargo run -p oci-tool -- init /tmp/testcontainer
+cargo run -p contain -- oci init /tmp/testcontainer
 
 # Download and extract busybox rootfs
 cd /tmp/testcontainer
@@ -48,10 +48,10 @@ sudo runc run mycontainer
 You're now in a container:
 ```bash
 # Inside container
-hostname          # → random or "runc"
-echo $$           # → 1
-ps aux            # → only your processes
-ls /              # → minimal busybox filesystem
+hostname          # -> random or "runc"
+echo $$           # -> 1
+ps aux            # -> only your processes
+ls /              # -> minimal busybox filesystem
 exit
 ```
 

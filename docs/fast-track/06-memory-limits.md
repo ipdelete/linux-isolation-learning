@@ -6,7 +6,7 @@ Limit a process's memory usage with cgroups.
 
 ## The test
 
-**File**: `crates/cgroup-tool/tests/memory_test.rs`
+**File**: `crates/contain/tests/cgroup_memory_test.rs`
 
 ```rust
 #[test]
@@ -16,12 +16,12 @@ fn test_memory_limit_set() {
     let cgroup = "/sys/fs/cgroup/test-mem";
 
     // Create and set limit
-    Command::cargo_bin("cgroup-tool").unwrap()
-        .args(["create", cgroup])
+    Command::cargo_bin("contain").unwrap()
+        .args(["cgroup", "create", cgroup])
         .assert().success();
 
-    Command::cargo_bin("cgroup-tool").unwrap()
-        .args(["memory-max", cgroup, "50M"])
+    Command::cargo_bin("contain").unwrap()
+        .args(["cgroup", "memory", cgroup, "50M"])
         .assert().success();
 
     // Verify limit was set
@@ -29,27 +29,27 @@ fn test_memory_limit_set() {
     assert!(limit.trim().parse::<u64>().unwrap() == 50 * 1024 * 1024);
 
     // Cleanup
-    Command::cargo_bin("cgroup-tool").unwrap()
-        .args(["delete", cgroup])
+    Command::cargo_bin("contain").unwrap()
+        .args(["cgroup", "delete", cgroup])
         .assert().success();
 }
 ```
 
-Run it: `sudo -E cargo test -p cgroup-tool --test memory_test`
+Run it: `sudo -E cargo test -p contain --test cgroup_memory_test`
 
 ## The implementation
 
-**File**: `crates/cgroup-tool/src/main.rs`
+**File**: `crates/contain/src/cgroup.rs`
 
 ```rust
-Command::MemoryMax { path, bytes } => {
+CgroupCommand::Memory { path, limit } => {
     // Parse human-readable sizes: 50M, 1G, etc.
-    let bytes_value = parse_size(&bytes)?;
+    let bytes_value = parse_size(&limit)?;
 
     let memory_max = format!("{}/memory.max", path);
     std::fs::write(&memory_max, bytes_value.to_string())?;
 
-    println!("Set memory.max = {} for {}", bytes, path);
+    println!("Set memory.max = {} for {}", limit, path);
     Ok(())
 }
 
@@ -72,8 +72,8 @@ fn parse_size(s: &str) -> Result<u64> {
 
 ```bash
 # Create cgroup with memory limit
-sudo cargo run -p cgroup-tool -- create /sys/fs/cgroup/limited
-sudo cargo run -p cgroup-tool -- memory-max /sys/fs/cgroup/limited 50M
+sudo cargo run -p contain -- cgroup create /sys/fs/cgroup/limited
+sudo cargo run -p contain -- cgroup memory /sys/fs/cgroup/limited 50M
 
 # Verify
 cat /sys/fs/cgroup/limited/memory.max
@@ -82,7 +82,7 @@ cat /sys/fs/cgroup/limited/memory.max
 sudo cgexec -g memory:/limited stress --vm 1 --vm-bytes 100M
 
 # Cleanup
-sudo cargo run -p cgroup-tool -- delete /sys/fs/cgroup/limited
+sudo cargo run -p contain -- cgroup delete /sys/fs/cgroup/limited
 ```
 
 ## What just happened

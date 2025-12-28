@@ -6,6 +6,7 @@ members = [
   "crates/oci-tool",
   "crates/ebpf-tool",
   "crates/ebpf-tool-common",
+  "crates/contain",
 ]
 resolver = "2"
 

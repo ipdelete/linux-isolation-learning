@@ -8,6 +8,21 @@ Learn Linux container primitives hands-on. 10 lessons, ~10 minutes each.
 - Linux with root access (or DevContainer)
 - Basic command line familiarity
 
+## The Tool
+
+All lessons use a single CLI tool: `contain`
+
+```bash
+cargo build -p contain
+```
+
+Subcommands:
+- `contain ns` — Namespace operations (pid, mount, container)
+- `contain net` — Network namespace (create, delete, veth)
+- `contain cgroup` — Resource limits (create, attach, memory, cpu)
+- `contain oci` — OCI bundle helpers
+- `contain trace` — eBPF tracing
+
 ## Lessons
 
 | # | Topic | Time | What You Build |

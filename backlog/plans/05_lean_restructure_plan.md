@@ -4,7 +4,7 @@ Goal: Add an approachable fast-track path alongside existing detailed tutorials.
 
 ## Validated Format
 
-Prototype proved 86% reduction (2,067 → 287 lines for 3 lessons). See `docs/prototype/`.
+Prototype proved 86% reduction (2,067 -> 287 lines for 3 lessons). See `docs/prototype/`.
 
 ```
 # Title (10 min)
@@ -18,7 +18,7 @@ Prototype proved 86% reduction (2,067 → 287 lines for 3 lessons). See `docs/pr
 
 ## Fast Track Lessons (10 total)
 
-New `docs/fast-track/` directory. Uses existing crates.
+New `docs/fast-track/` directory.
 
 ### Namespaces (4 lessons)
 - [x] `01-pid-namespace.md` — process isolation
@@ -38,6 +38,28 @@ New `docs/fast-track/` directory. Uses existing crates.
 ### Observability (1 lesson)
 - [x] `10-ebpf-tracing.md` — eBPF basics
 
+## Unified Tool
+
+New `crates/contain/` alongside existing crates:
+```
+contain ns pid          # namespace operations
+contain ns mount
+contain ns container
+contain net create      # network namespace
+contain net delete
+contain net veth
+contain cgroup create   # cgroup operations
+contain cgroup attach
+contain cgroup memory
+contain cgroup cpu
+contain oci init        # OCI bundle
+contain oci run
+contain trace syscalls  # eBPF tracing
+contain trace events
+```
+
+Existing crates (`ns-tool`, `cgroup-tool`, etc.) preserved for reference and advanced use.
+
 ## What Stays the Same
 
 - All existing crates (`ns-tool`, `cgroup-tool`, etc.)
@@ -47,6 +69,7 @@ New `docs/fast-track/` directory. Uses existing crates.
 
 ## What Changes
 
+- New `crates/contain/` unified CLI tool for fast-track lessons
 - New `docs/fast-track/` with 10 lean lessons
 - README gets a "Quick Start" section pointing to fast-track
 - Fast-track links to detailed docs: "Want more depth? See [full lesson](../01-namespaces/01-pid-namespace.md)"
@@ -57,5 +80,7 @@ New `docs/fast-track/` directory. Uses existing crates.
 - [x] Write remaining 7 fast-track lessons
 - [x] Add fast-track intro/README
 - [x] Update main README with dual-path options
+- [x] Create `crates/contain/` unified CLI
+- [x] Update all fast-track lessons to use `contain`
 
 ## Status: COMPLETE

@@ -6,7 +6,7 @@ A mini-container: isolated PID, hostname, network, and filesystem in one process
 
 ## The test
 
-**File**: `crates/ns-tool/tests/container_test.rs`
+**File**: `crates/contain/tests/ns_container_test.rs`
 
 ```rust
 #[test]
@@ -15,8 +15,8 @@ fn test_container_isolation() {
 
     let parent_pid_ns = fs::read_link("/proc/self/ns/pid").unwrap();
 
-    Command::cargo_bin("ns-tool").unwrap()
-        .args(["container", "--", "/bin/sh", "-c", "echo PID:$$ && hostname"])
+    Command::cargo_bin("contain").unwrap()
+        .args(["ns", "container", "--", "/bin/sh", "-c", "echo PID:$$ && hostname"])
         .assert()
         .success()
         .stdout(predicate::str::contains("PID:1"))
@@ -28,14 +28,14 @@ fn test_container_isolation() {
 }
 ```
 
-Run it (expect failure): `sudo -E cargo test -p ns-tool --test container_test`
+Run it (expect failure): `sudo -E cargo test -p contain --test ns_container_test`
 
 ## The implementation
 
-**File**: `crates/ns-tool/src/main.rs`
+**File**: `crates/contain/src/ns.rs`
 
 ```rust
-Command::Container { hostname, command } => {
+NsCommand::Container { hostname, command } => {
     use nix::sched::{unshare, CloneFlags};
     use nix::unistd::{fork, ForkResult, sethostname, execvp, getpid};
     use nix::mount::{mount, MsFlags};
@@ -82,7 +82,7 @@ Command::Container { hostname, command } => {
 }
 ```
 
-Add to the `Command` enum:
+Add to the `NsCommand` enum:
 ```rust
 Container {
     #[arg(long, default_value = "container")]
@@ -92,20 +92,20 @@ Container {
 },
 ```
 
-Run tests: `sudo -E cargo test -p ns-tool --test container_test`
+Run tests: `sudo -E cargo test -p contain --test ns_container_test`
 
 ## Run it
 
 ```bash
-sudo cargo run -p ns-tool -- container
+sudo cargo run -p contain -- ns container
 ```
 
 You're now in an isolated shell:
 ```bash
-hostname        # → container
-echo $$         # → 1
-ps aux          # → only your shell process
-ip addr         # → only loopback
+hostname        # -> container
+echo $$         # -> 1
+ps aux          # -> only your shell process
+ip addr         # -> only loopback
 exit
 ```
 
