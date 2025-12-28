@@ -79,6 +79,7 @@ Five Rust CLI tools that demonstrate container building blocks:
 ### 90 - Appendix
 - [01-rust-syscall-cheatsheet.md](docs/90-appendix/01-rust-syscall-cheatsheet.md)
 - [02-troubleshooting.md](docs/90-appendix/02-troubleshooting.md)
+- [03-orbstack-setup.md](docs/90-appendix/03-orbstack-setup.md)
 
 ## Safety Note
 

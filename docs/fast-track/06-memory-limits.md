@@ -1,8 +1,9 @@
 # Memory Limits (10 min)
 
-> **⚠️ Environment: Linux VM Required**
+> **Environment: Linux VM Required**
 >
-> This lesson writes to cgroup control files (`memory.max`), which requires cgroup delegation. The DevContainer does not support this. Use a Linux VM or native Linux. See [validation.md](../../.devcontainer/validation.md) for setup.
+> This lesson writes to cgroup control files (`memory.max`).
+> See **[OrbStack Setup Guide](../90-appendix/03-orbstack-setup.md)** to set up a Linux VM.
 
 ## What you'll build
 

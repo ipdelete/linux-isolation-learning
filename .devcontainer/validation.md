@@ -20,9 +20,28 @@ The DevContainer runs inside Docker, which imposes cgroup restrictions. You can:
 
 **Lessons 06-07 (Memory/CPU Limits)** need a Linux VM for full functionality.
 
-### Linux VM Setup (Mac with Apple Silicon)
+### Linux VM Setup (Mac - OrbStack Recommended)
 
-For full cgroup support, use a Linux VM with VS Code Remote-SSH:
+For complete setup instructions, see **[OrbStack Setup Guide](../docs/90-appendix/03-orbstack-setup.md)**.
+
+**Quick start**:
+```bash
+brew install orbstack      # or download from orbstack.dev
+orb create ubuntu cgroup-vm
+ssh cgroup-vm@orb          # connect via SSH
+```
+
+Then use VS Code Remote-SSH to connect to `cgroup-vm@orb`.
+
+**Verify cgroup delegation works**:
+```bash
+cat /sys/fs/cgroup/user.slice/user-$(id -u).slice/cgroup.subtree_control
+# Should show: cpu memory pids io ...
+```
+
+### Alternative: UTM (Manual VM)
+
+If you prefer a traditional VM or OrbStack isn't available:
 
 1. **Install UTM** (free): https://mac.getutm.app/
 
@@ -57,17 +76,10 @@ For full cgroup support, use a Linux VM with VS Code Remote-SSH:
    cargo build
    ```
 
-8. **Verify cgroup delegation works**:
-   ```bash
-   cat /sys/fs/cgroup/user.slice/user-$(id -u).slice/cgroup.subtree_control
-   # Should show: cpu memory pids io ...
-   ```
-
-### Alternative VM Options
+### Other VM Options
 
 | Tool | Platform | Notes |
 |------|----------|-------|
-| **OrbStack** | Mac (ARM/Intel) | Fast, has "Linux machines" feature |
 | **Multipass** | Mac/Linux/Windows | Ubuntu-focused, easy CLI |
 | **Lima** | Mac | Flexible, nerdctl support |
 | **WSL2** | Windows | Native, good cgroup support |
