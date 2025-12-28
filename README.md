@@ -2,6 +2,20 @@
 
 A hands-on Rust learning path for Linux container primitives: namespaces, cgroups, and OCI/runc.
 
+## Choose Your Path
+
+### Fast Track (2 hours)
+
+Get hands-on with container internals quickly. 10 lessons, ~10 minutes each.
+
+**[Start Fast Track](docs/fast-track/README.md)**
+
+### Full Tutorial (comprehensive)
+
+Deep dive with detailed explanations, edge cases, and thorough coverage.
+
+**[Start with Foundations](docs/00-foundations/00-setup-rust.md)**
+
 ## What You Will Build
 
 Five Rust CLI tools that demonstrate container building blocks:
@@ -10,10 +24,6 @@ Five Rust CLI tools that demonstrate container building blocks:
 - **cgroup-tool** - cgroup v2 resource limits
 - **oci-tool** - OCI bundle helpers
 - **ebpf-tool** - eBPF tracing with kprobes, uprobes, and tracepoints
-
-## Getting Started
-
-Start with [00-setup-rust.md](docs/00-foundations/00-setup-rust.md) and follow the numbered lessons in order.
 
 ## Table of Contents
 
