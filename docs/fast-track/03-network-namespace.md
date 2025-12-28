@@ -6,7 +6,7 @@ An isolated network stack with its own interfaces, connected to the host via vet
 
 ## The test
 
-**File**: `crates/netns-tool/tests/veth_test.rs`
+**File**: `crates/contain/tests/net_test.rs`
 
 ```rust
 #[test]
@@ -14,30 +14,30 @@ fn test_veth_pair_created() {
     if !nix::unistd::Uid::effective().is_root() { return; }
 
     // Create namespace and veth pair
-    Command::cargo_bin("netns-tool").unwrap()
-        .args(["create", "test-ns"])
+    Command::cargo_bin("contain").unwrap()
+        .args(["net", "create", "test-ns"])
         .assert().success();
 
-    Command::cargo_bin("netns-tool").unwrap()
-        .args(["veth", "--host", "veth-host", "--ns", "test-ns"])
+    Command::cargo_bin("contain").unwrap()
+        .args(["net", "veth", "--host", "veth-host", "--ns", "test-ns"])
         .assert().success();
 
     // Cleanup
-    Command::cargo_bin("netns-tool").unwrap()
-        .args(["delete", "test-ns"])
+    Command::cargo_bin("contain").unwrap()
+        .args(["net", "delete", "test-ns"])
         .assert().success();
 }
 ```
 
-Run it: `sudo -E cargo test -p netns-tool --test veth_test`
+Run it: `sudo -E cargo test -p contain --test net_test`
 
 ## The implementation
 
-**File**: `crates/netns-tool/src/main.rs`
+**File**: `crates/contain/src/net.rs`
 
 Create namespace:
 ```rust
-Command::Create { name } => {
+NetCommand::Create { name } => {
     use std::process::Command as Cmd;
 
     // Create named network namespace
@@ -52,7 +52,7 @@ Command::Create { name } => {
 
 Create veth pair:
 ```rust
-Command::Veth { host, ns } => {
+NetCommand::Veth { host, ns } => {
     use std::process::Command as Cmd;
 
     // Create veth pair
@@ -79,10 +79,10 @@ Command::Veth { host, ns } => {
 
 ```bash
 # Create namespace
-sudo cargo run -p netns-tool -- create mynet
+sudo cargo run -p contain -- net create mynet
 
 # Create veth pair
-sudo cargo run -p netns-tool -- veth --host veth-host --ns mynet
+sudo cargo run -p contain -- net veth --host veth-host --ns mynet
 
 # Check host side
 ip link show veth-host
@@ -91,7 +91,7 @@ ip link show veth-host
 sudo ip netns exec mynet ip link show
 
 # Cleanup
-sudo cargo run -p netns-tool -- delete mynet
+sudo cargo run -p contain -- net delete mynet
 ```
 
 ## What just happened

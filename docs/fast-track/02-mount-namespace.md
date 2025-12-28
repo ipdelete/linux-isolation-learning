@@ -6,15 +6,15 @@ A process with isolated filesystem mounts that don't leak to the host.
 
 ## The test
 
-**File**: `crates/ns-tool/tests/mount_test.rs`
+**File**: `crates/contain/tests/ns_mount_test.rs`
 
 ```rust
 #[test]
 fn test_mount_namespace_isolation() {
     let mounts_before = fs::read_to_string("/proc/self/mounts").unwrap();
 
-    Command::cargo_bin("ns-tool").unwrap()
-        .arg("mount")
+    Command::cargo_bin("contain").unwrap()
+        .args(["ns", "mount"])
         .assert()
         .success()
         .stdout(predicate::str::contains("/mnt/test_mount"));
@@ -24,14 +24,14 @@ fn test_mount_namespace_isolation() {
 }
 ```
 
-Run it (expect failure): `sudo -E cargo test -p ns-tool --test mount_test`
+Run it (expect failure): `sudo -E cargo test -p contain --test ns_mount_test`
 
 ## The implementation
 
-**File**: `crates/ns-tool/src/main.rs` — find `Command::Mount`
+**File**: `crates/contain/src/ns.rs` — find `NsCommand::Mount`
 
 ```rust
-Command::Mount => {
+NsCommand::Mount => {
     use nix::mount::{mount, umount, MsFlags};
     use nix::sched::{unshare, CloneFlags};
 
@@ -64,12 +64,12 @@ Command::Mount => {
 }
 ```
 
-Run tests: `sudo -E cargo test -p ns-tool --test mount_test`
+Run tests: `sudo -E cargo test -p contain --test ns_mount_test`
 
 ## Run it
 
 ```bash
-sudo cargo run -p ns-tool -- mount
+sudo cargo run -p contain -- ns mount
 ```
 
 Output:

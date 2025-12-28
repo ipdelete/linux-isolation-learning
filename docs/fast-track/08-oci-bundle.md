@@ -6,7 +6,7 @@ Create an OCI-compliant container bundle that runc can execute.
 
 ## The test
 
-**File**: `crates/oci-tool/tests/init_test.rs`
+**File**: `crates/contain/tests/oci_test.rs`
 
 ```rust
 #[test]
@@ -14,8 +14,8 @@ fn test_oci_bundle_init() {
     let dir = tempfile::tempdir().unwrap();
     let bundle = dir.path().join("mybundle");
 
-    Command::cargo_bin("oci-tool").unwrap()
-        .args(["init", bundle.to_str().unwrap()])
+    Command::cargo_bin("contain").unwrap()
+        .args(["oci", "init", bundle.to_str().unwrap()])
         .assert().success();
 
     // Verify structure
@@ -24,14 +24,14 @@ fn test_oci_bundle_init() {
 }
 ```
 
-Run it: `cargo test -p oci-tool --test init_test`
+Run it: `cargo test -p contain --test oci_test`
 
 ## The implementation
 
-**File**: `crates/oci-tool/src/main.rs`
+**File**: `crates/contain/src/oci.rs`
 
 ```rust
-Command::Init { path } => {
+OciCommand::Init { path } => {
     use std::fs;
 
     // Create bundle directory
@@ -76,7 +76,7 @@ Command::Init { path } => {
 
 ```bash
 # Create bundle
-cargo run -p oci-tool -- init /tmp/mybundle
+cargo run -p contain -- oci init /tmp/mybundle
 
 # Check structure
 ls -la /tmp/mybundle/

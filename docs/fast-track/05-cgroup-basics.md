@@ -6,7 +6,7 @@ Create a cgroup and attach a process to it for resource control.
 
 ## The test
 
-**File**: `crates/cgroup-tool/tests/create_test.rs`
+**File**: `crates/contain/tests/cgroup_test.rs`
 
 ```rust
 #[test]
@@ -15,29 +15,29 @@ fn test_cgroup_create_and_attach() {
 
     let cgroup = "/sys/fs/cgroup/test-cg";
 
-    Command::cargo_bin("cgroup-tool").unwrap()
-        .args(["create", cgroup])
+    Command::cargo_bin("contain").unwrap()
+        .args(["cgroup", "create", cgroup])
         .assert().success();
 
     // Verify cgroup exists
     assert!(std::path::Path::new(cgroup).exists());
 
     // Cleanup
-    Command::cargo_bin("cgroup-tool").unwrap()
-        .args(["delete", cgroup])
+    Command::cargo_bin("contain").unwrap()
+        .args(["cgroup", "delete", cgroup])
         .assert().success();
 }
 ```
 
-Run it: `sudo -E cargo test -p cgroup-tool --test create_test`
+Run it: `sudo -E cargo test -p contain --test cgroup_test`
 
 ## The implementation
 
-**File**: `crates/cgroup-tool/src/main.rs`
+**File**: `crates/contain/src/cgroup.rs`
 
 Create cgroup:
 ```rust
-Command::Create { path } => {
+CgroupCommand::Create { path } => {
     std::fs::create_dir_all(&path)?;
     println!("Created cgroup: {}", path);
     Ok(())
@@ -46,7 +46,7 @@ Command::Create { path } => {
 
 Attach process:
 ```rust
-Command::Attach { path, pid } => {
+CgroupCommand::Attach { path, pid } => {
     let procs_file = format!("{}/cgroup.procs", path);
     std::fs::write(&procs_file, pid.to_string())?;
     println!("Attached PID {} to {}", pid, path);
@@ -56,7 +56,7 @@ Command::Attach { path, pid } => {
 
 Delete cgroup:
 ```rust
-Command::Delete { path } => {
+CgroupCommand::Delete { path } => {
     std::fs::remove_dir(&path)?;
     println!("Deleted cgroup: {}", path);
     Ok(())
@@ -67,19 +67,19 @@ Command::Delete { path } => {
 
 ```bash
 # Create a cgroup
-sudo cargo run -p cgroup-tool -- create /sys/fs/cgroup/mygroup
+sudo cargo run -p contain -- cgroup create /sys/fs/cgroup/mygroup
 
 # Start a process and attach it
 sleep 1000 &
 PID=$!
-sudo cargo run -p cgroup-tool -- attach /sys/fs/cgroup/mygroup $PID
+sudo cargo run -p contain -- cgroup attach /sys/fs/cgroup/mygroup $PID
 
 # Verify
 cat /sys/fs/cgroup/mygroup/cgroup.procs
 
 # Cleanup
 kill $PID
-sudo cargo run -p cgroup-tool -- delete /sys/fs/cgroup/mygroup
+sudo cargo run -p contain -- cgroup delete /sys/fs/cgroup/mygroup
 ```
 
 ## What just happened

@@ -6,29 +6,29 @@ A process that becomes PID 1 in its own isolated process tree.
 
 ## The test
 
-**File**: `crates/ns-tool/tests/pid_test.rs`
+**File**: `crates/contain/tests/ns_pid_test.rs`
 
 ```rust
 #[test]
 fn test_pid_namespace_creation() {
     if !nix::unistd::Uid::effective().is_root() { return; }
 
-    Command::cargo_bin("ns-tool").unwrap()
-        .arg("pid")
+    Command::cargo_bin("contain").unwrap()
+        .args(["ns", "pid"])
         .assert()
         .success()
         .stdout(predicate::str::contains("PID inside namespace: 1"));
 }
 ```
 
-Run it (expect failure): `sudo -E cargo test -p ns-tool --test pid_test`
+Run it (expect failure): `sudo -E cargo test -p contain --test ns_pid_test`
 
 ## The implementation
 
-**File**: `crates/ns-tool/src/main.rs` — find `Command::Pid`
+**File**: `crates/contain/src/ns.rs` — find `NsCommand::Pid`
 
 ```rust
-Command::Pid => {
+NsCommand::Pid => {
     use nix::sched::{unshare, CloneFlags};
     use nix::unistd::{fork, ForkResult, getpid};
     use nix::sys::wait::waitpid;
@@ -49,12 +49,12 @@ Command::Pid => {
 }
 ```
 
-Run tests: `sudo -E cargo test -p ns-tool --test pid_test`
+Run tests: `sudo -E cargo test -p contain --test ns_pid_test`
 
 ## Run it
 
 ```bash
-sudo cargo run -p ns-tool -- pid
+sudo cargo run -p contain -- ns pid
 ```
 
 Output:

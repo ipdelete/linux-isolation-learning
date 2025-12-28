@@ -16,20 +16,20 @@ ls /sys/fs/bpf
 
 ## The test
 
-**File**: `crates/ebpf-tool/tests/kprobe_test.rs`
+**File**: `crates/contain/tests/trace_test.rs`
 
 ```rust
 #[test]
 fn test_ebpf_builds() {
     // Just verify the eBPF program compiles
-    Command::cargo_bin("ebpf-tool").unwrap()
-        .args(["check"])
+    Command::cargo_bin("contain").unwrap()
+        .args(["trace", "check"])
         .assert()
         .success();
 }
 ```
 
-Run it: `cargo test -p ebpf-tool --test kprobe_test`
+Run it: `cargo test -p contain --test trace_test`
 
 ## The eBPF program
 
@@ -59,10 +59,10 @@ fn try_trace_exec(ctx: &ProbeContext) -> Result<(), i64> {
 
 ## The userspace loader
 
-**File**: `crates/ebpf-tool/src/main.rs`
+**File**: `crates/contain/src/trace.rs`
 
 ```rust
-Command::Trace => {
+TraceCommand::Syscalls { pid } => {
     use aya::{Bpf, programs::KProbe};
 
     // Load eBPF bytecode
@@ -88,7 +88,7 @@ Command::Trace => {
 
 Terminal 1 - Start tracing:
 ```bash
-sudo cargo run -p ebpf-tool -- trace
+sudo cargo run -p contain -- trace syscalls
 ```
 
 Terminal 2 - Trigger some execs:
@@ -110,10 +110,9 @@ eBPF lets you run sandboxed programs in the kernel. A kprobe attaches to a kerne
 
 ## Going further
 
-The full `ebpf-tool` has more:
-- `tracepoint` - Trace syscalls via tracepoints
-- `uprobe` - Trace userspace functions
-- `perf` - Performance sampling
+The full `contain` tool has more:
+- `syscalls` - Trace syscalls with optional PID filter
+- `events` - Trace container lifecycle events
 
 See `docs/04-ebpf/` for detailed lessons.
 
