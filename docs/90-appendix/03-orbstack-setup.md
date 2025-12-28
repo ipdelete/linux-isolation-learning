@@ -66,9 +66,9 @@ Inside the machine, check that cgroup delegation works:
 cat /sys/fs/cgroup/user.slice/user-$(id -u).slice/cgroup.subtree_control
 ```
 
-**Expected output**: `cpu cpuset io memory hugetlb pids rdma misc`
+**Expected output**: `cpu memory pids`
 
-If you see `memory` in the list, cgroup memory limits will work!
+If you see `memory` in the list, cgroup memory limits will work! The available controllers may vary depending on your Ubuntu version, but `cpu`, `memory`, and `pids` are sufficient for the cgroup lessons.
 
 ## Step 5: Install Rust Toolchain
 
