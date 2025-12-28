@@ -2,6 +2,76 @@
 
 This document provides step-by-step validation that your devcontainer is properly configured for the Linux isolation learning tutorials.
 
+## Environment Options
+
+This tutorial supports two environments:
+
+| Environment | Best For | Cgroup Limits | Setup |
+|-------------|----------|---------------|-------|
+| **DevContainer** | Lessons 01-05, 08-10 | ❌ Read-only | Open in VS Code |
+| **Linux VM** | All lessons (01-10) | ✅ Full control | See below |
+
+### Why Two Options?
+
+The DevContainer runs inside Docker, which imposes cgroup restrictions. You can:
+- ✅ Create namespaces (PID, mount, network, user)
+- ✅ Read cgroup stats (`memory.current`, `cpu.stat`)
+- ❌ Set cgroup limits (`memory.max`, `cpu.max`) — requires Linux VM
+
+**Lessons 06-07 (Memory/CPU Limits)** need a Linux VM for full functionality.
+
+### Linux VM Setup (Mac with Apple Silicon)
+
+For full cgroup support, use a Linux VM with VS Code Remote-SSH:
+
+1. **Install UTM** (free): https://mac.getutm.app/
+
+2. **Download Ubuntu Server ARM64**:
+   - https://ubuntu.com/download/server/arm
+   - Get: `ubuntu-24.04.x-live-server-arm64.iso`
+
+3. **Create VM in UTM**:
+   - New → Virtualize → Linux
+   - RAM: 4GB+, Disk: 20GB+
+   - Boot from ISO, complete install
+
+4. **In the VM**, enable SSH:
+   ```bash
+   sudo apt update && sudo apt install -y openssh-server
+   ip addr  # note the IP address
+   ```
+
+5. **On your Mac**, add to `~/.ssh/config`:
+   ```
+   Host linux-vm
+       HostName <vm-ip-address>
+       User <your-username>
+   ```
+
+6. **VS Code**: Remote-SSH → Connect to `linux-vm`
+
+7. **Clone and build**:
+   ```bash
+   git clone <repo-url>
+   cd linux-isolation-learning
+   cargo build
+   ```
+
+8. **Verify cgroup delegation works**:
+   ```bash
+   cat /sys/fs/cgroup/user.slice/user-$(id -u).slice/cgroup.subtree_control
+   # Should show: cpu memory pids io ...
+   ```
+
+### Alternative VM Options
+
+| Tool | Platform | Notes |
+|------|----------|-------|
+| **OrbStack** | Mac (ARM/Intel) | Fast, has "Linux machines" feature |
+| **Multipass** | Mac/Linux/Windows | Ubuntu-focused, easy CLI |
+| **Lima** | Mac | Flexible, nerdctl support |
+| **WSL2** | Windows | Native, good cgroup support |
+
 ## Important: Root Access in DevContainer vs. Native Linux
 
 **In the DevContainer**, you run as `root` (UID 0). **On native Linux**, you run as a regular user with `sudo` access. Here's how to adapt the lessons:

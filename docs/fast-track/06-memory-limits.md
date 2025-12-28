@@ -1,5 +1,9 @@
 # Memory Limits (10 min)
 
+> **⚠️ Environment: Linux VM Required**
+>
+> This lesson writes to cgroup control files (`memory.max`), which requires cgroup delegation. The DevContainer does not support this. Use a Linux VM or native Linux. See [validation.md](../../.devcontainer/validation.md) for setup.
+
 ## What you'll build
 
 Limit a process's memory usage with cgroups.
