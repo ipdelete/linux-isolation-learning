@@ -30,4 +30,14 @@ The lesson instructs learners to run `cargo test -p contain --test trace_test` a
 Learners cannot complete the eBPF fast-track lesson as written.
 
 ## Status
-OPEN
+RESOLVED
+
+## Resolution
+1. Added `TraceCommand::Check` subcommand to `crates/contain/src/trace.rs`
+   - Includes `todo!()` stub for TDD workflow
+   - Checks eBPF support and prerequisites
+2. Created `crates/contain/tests/trace_test.rs` with TDD-style `todo!()` stubs:
+   - `test_ebpf_check` - tests the check subcommand
+   - `test_trace_syscalls_requires_root` - tests privilege requirements
+3. Updated `main.rs` command list to include `trace check`
+4. The `trace syscalls` and `trace events` `todo!()` stubs are intentional for TDD workflow

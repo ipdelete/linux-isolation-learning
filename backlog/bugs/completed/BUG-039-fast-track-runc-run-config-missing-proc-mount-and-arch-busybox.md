@@ -32,4 +32,17 @@ PID   USER     COMMAND
 Learners cannot complete the runc run lesson without adding a `/proc` mount and using an architecture-appropriate busybox binary.
 
 ## Status
-OPEN
+RESOLVED
+
+## Resolution
+1. Added `/proc` mount to non-interactive `config.json` example:
+   ```json
+   "mounts": [{"destination": "/proc", "type": "proc", "source": "proc"}]
+   ```
+2. Added architecture detection for busybox download:
+   - x86_64: downloads from busybox.net
+   - aarch64: uses `busybox-static` package via apt
+3. Added architecture detection for runc download in Prerequisites:
+   - x86_64: downloads `runc.amd64`
+   - aarch64: downloads `runc.arm64`
+4. Added `rootfs/proc` directory creation in setup

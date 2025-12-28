@@ -6,6 +6,10 @@ use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum TraceCommand {
+    /// Check eBPF support and prerequisites
+    /// Lesson: docs/fast-track/10-ebpf-tracing.md
+    Check,
+
     /// Trace system calls in a container using eBPF
     /// Lesson: docs/fast-track/10-ebpf-tracing.md
     Syscalls {
@@ -22,6 +26,17 @@ pub enum TraceCommand {
 impl TraceCommand {
     pub fn run(&self) -> Result<()> {
         match self {
+            TraceCommand::Check => {
+                // TODO: Check eBPF support and prerequisites
+                // Lesson: docs/fast-track/10-ebpf-tracing.md
+                // Tests: tests/trace_test.rs
+                //
+                // Implementation hints:
+                // - Check /sys/fs/bpf exists
+                // - Check kernel version supports eBPF
+                // - Check CAP_BPF or root privileges
+                todo!("Implement eBPF check - see docs/fast-track/10-ebpf-tracing.md")
+            }
             TraceCommand::Syscalls { pid } => {
                 // TODO: Attach eBPF program to trace syscalls
                 // Lesson: docs/fast-track/10-ebpf-tracing.md

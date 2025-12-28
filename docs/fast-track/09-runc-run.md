@@ -8,12 +8,18 @@ Execute an OCI bundle using runc, the reference container runtime.
 
 Install runc:
 ```bash
-# Debian/Ubuntu
-sudo apt-get install runc
+# Debian/Ubuntu (recommended - handles architecture automatically)
+sudo apt-get install -y runc
 
-# Or download from GitHub
-curl -LO https://github.com/opencontainers/runc/releases/download/v1.1.12/runc.amd64
-sudo install runc.amd64 /usr/local/bin/runc
+# Or download from GitHub (architecture-aware)
+ARCH=$(uname -m)
+if [ "$ARCH" = "x86_64" ]; then
+    curl -LO https://github.com/opencontainers/runc/releases/download/v1.1.12/runc.amd64
+    sudo install runc.amd64 /usr/local/bin/runc
+elif [ "$ARCH" = "aarch64" ]; then
+    curl -LO https://github.com/opencontainers/runc/releases/download/v1.1.12/runc.arm64
+    sudo install runc.arm64 /usr/local/bin/runc
+fi
 ```
 
 ## Setup
@@ -23,11 +29,22 @@ Create a working bundle with busybox:
 # Create bundle
 cargo run -p contain -- oci init /tmp/testcontainer
 
-# Download and extract busybox rootfs
+# Download busybox (architecture-aware)
 cd /tmp/testcontainer
-curl -LO https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox
-mkdir -p rootfs/bin rootfs/usr/bin
-cp busybox rootfs/bin/
+mkdir -p rootfs/bin rootfs/usr/bin rootfs/proc
+
+ARCH=$(uname -m)
+if [ "$ARCH" = "x86_64" ]; then
+    curl -LO https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox
+    cp busybox rootfs/bin/
+elif [ "$ARCH" = "aarch64" ]; then
+    # arm64: use system busybox-static
+    apt-get install -y busybox-static 2>/dev/null || sudo apt-get install -y busybox-static
+    cp /bin/busybox rootfs/bin/
+else
+    echo "Unsupported architecture: $ARCH"
+    exit 1
+fi
 chmod +x rootfs/bin/busybox
 
 # Create symlinks for common commands
@@ -58,7 +75,7 @@ exit
 ## Non-interactive run
 
 ```bash
-# Modify config.json: set terminal to false, change args
+# Modify config.json: set terminal to false, change args, add /proc mount
 cat > /tmp/testcontainer/config.json << 'EOF'
 {
     "ociVersion": "1.0.2",
@@ -68,6 +85,13 @@ cat > /tmp/testcontainer/config.json << 'EOF'
         "cwd": "/"
     },
     "root": {"path": "rootfs", "readonly": false},
+    "mounts": [
+        {
+            "destination": "/proc",
+            "type": "proc",
+            "source": "proc"
+        }
+    ],
     "linux": {
         "namespaces": [
             {"type": "pid"},

@@ -28,4 +28,10 @@ The lesson instructs learners to run `cargo test -p contain --test oci_test`, bu
 Learners cannot follow the lesson as written because the referenced test file is missing, the implementation is stubbed, and the dev-dependency is absent.
 
 ## Status
-OPEN
+RESOLVED
+
+## Resolution
+- Added `tempfile = "3.10"` dev-dependency to `crates/contain/Cargo.toml`
+- Created `crates/contain/tests/oci_test.rs` with TDD-style `todo!()` stubs
+- Tests now compile and fail with expected RED state (todo panics)
+- The `OciCommand::Init` todo!() is intentional for TDD workflow - learners implement it
