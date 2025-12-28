@@ -31,6 +31,47 @@ fn test_ebpf_builds() {
 
 Run it: `cargo test -p contain --test trace_test`
 
+## The check implementation
+
+**File**: `crates/contain/src/trace.rs`
+
+First, implement the `check` command to verify eBPF prerequisites:
+
+```rust
+TraceCommand::Check => {
+    use std::path::Path;
+
+    println!("Checking eBPF support...\n");
+
+    // Check /sys/fs/bpf exists
+    let bpf_fs = Path::new("/sys/fs/bpf");
+    if bpf_fs.exists() {
+        println!("✓ /sys/fs/bpf exists");
+    } else {
+        println!("✗ /sys/fs/bpf not found");
+    }
+
+    // Check kernel version
+    let uname = nix::sys::utsname::uname()?;
+    println!("✓ Kernel: {}", uname.release().to_string_lossy());
+
+    // Check if running as root
+    if nix::unistd::Uid::effective().is_root() {
+        println!("✓ Running as root");
+    } else {
+        println!("✗ Not running as root (eBPF requires CAP_BPF or root)");
+    }
+
+    println!("\neBPF check complete.");
+    Ok(())
+}
+```
+
+Run it:
+```bash
+cargo run -p contain -- trace check
+```
+
 ## The eBPF program
 
 **File**: `crates/ebpf-tool-ebpf/src/kprobe.rs`

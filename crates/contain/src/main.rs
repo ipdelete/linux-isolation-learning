@@ -17,6 +17,7 @@
 //   contain cgroup cpu      - Set CPU limit
 //   contain oci init        - Initialize OCI bundle
 //   contain oci run         - Run container with runc
+//   contain trace check     - Check eBPF support
 //   contain trace syscalls  - Trace syscalls with eBPF
 //   contain trace events    - Trace container events
 
