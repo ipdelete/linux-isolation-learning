@@ -27,4 +27,8 @@ The lesson instructs learners to run a test and then implement `NetCommand` hand
 Learners cannot follow the lesson as written because the referenced test file is missing and the code paths are stubbed.
 
 ## Status
-OPEN
+CLOSED
+
+## Resolution
+Created `crates/contain/tests/net_test.rs` with `todo!()` stub following TDD pattern.
+The implementation stubs in `src/net.rs` already exist with `todo!()` - learners implement both.
